@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
  
     <groupId>ubc.cosc322</groupId>
-    <artifactId>team-00</artifactId>
+    <artifactId>team-01</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
      
@@ -51,7 +51,7 @@
  
     </build>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 </project>
