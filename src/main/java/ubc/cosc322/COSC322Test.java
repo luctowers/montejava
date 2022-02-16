@@ -81,6 +81,7 @@ public class COSC322Test extends GamePlayer{
 	public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
 		switch (messageType) {
 			case GameMessage.GAME_STATE_BOARD:
+				System.out.println((ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE));
 				gamegui.setGameState((ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE));
 				break;
 			case GameMessage.GAME_ACTION_MOVE:

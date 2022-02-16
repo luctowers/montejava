@@ -8,9 +8,9 @@
     <packaging>jar</packaging>
      
 
-    <name>COSC322-Team-00</name>
+    <name>COSC322-Team-01</name>
     <description>COSC 322 Game Player Project</description>
-    <inceptionYear>2021</inceptionYear>
+    <inceptionYear>2022</inceptionYear>
     
 	
     <dependencies> 
@@ -36,8 +36,8 @@
     <url>https:people.ok.uc.ca/yongg</url>
     <developers>
         <developer>
-            <id>Team-00</id>
-            <name>Team members</name>
+            <id>Team-01</id>
+            <name>Lucas Towers</name>
             <email></email>
         </developer> 
         <developer>
