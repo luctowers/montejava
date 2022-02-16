@@ -1,6 +1,7 @@
 package ubc.cosc322.engine.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,25 @@ public class State {
 		for (Position queenPosition : blackQueens) {
 			board[boardIndex(queenPosition)] = Piece.BLACK_QUEEN;
 		}
+	}
+
+	// standard initial board state
+	public State() {
+		this(
+			10, 10,
+			Arrays.asList(
+				new Position(0, 6),
+				new Position(3, 9),
+				new Position(6, 9),
+				new Position(9, 6)
+			),
+			Arrays.asList(
+				new Position(0, 3),
+				new Position(3, 0),
+				new Position(6, 0),
+				new Position(9, 3)
+			)
+		);
 	}
 
 	public void doMove(Move move) {

@@ -16,21 +16,7 @@ public class LocalTest {
 
 		final int ITERATION_COUNT = 1000;
 
-		State state = new State(
-			10, 10,
-			Arrays.asList(
-				new Position(0, 6),
-				new Position(3, 9),
-				new Position(6, 9),
-				new Position(9, 6)
-			),
-			Arrays.asList(
-				new Position(0, 3),
-				new Position(3, 0),
-				new Position(6, 0),
-				new Position(9, 3)
-			)
-		);
+		State state = new State(); // standard 10x10 4 queen board
 
 		Player white = new RandomPlayer(new LegalMoveGenerator());
 		Player black = new RandomPlayer(new LegalMoveGenerator());
