@@ -24,7 +24,7 @@ public class LegalMoveGenerator implements MoveGenerator {
 	}
 
 	private List<Move> generateQueenMoves(State state) {
-		ArrayList<Move> moves = new ArrayList<>(27);
+		ArrayList<Move> moves = new ArrayList<>();
 		for (Position source : state.getQueens(state.getColorToMove())) {
 			for (Position destination : generateDestinations(state, source)) {
 				moves.add(new Move(
@@ -38,7 +38,7 @@ public class LegalMoveGenerator implements MoveGenerator {
 	}
 
 	private List<Move> generateArrowMoves(State state) {
-		ArrayList<Move> moves = new ArrayList<>(27);
+		ArrayList<Move> moves = new ArrayList<>();
 		Position source = state.getLastMovedQueen();
 		for (Position destination : generateDestinations(state, source)) {
 			moves.add(new Move(
