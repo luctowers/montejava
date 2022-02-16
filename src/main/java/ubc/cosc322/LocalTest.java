@@ -2,8 +2,8 @@ package ubc.cosc322;
 
 import java.util.Arrays;
 
+import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.Position;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
@@ -13,6 +13,8 @@ import ubc.cosc322.engine.players.RandomPlayer;
 public class LocalTest {
 	
 	public static void main(String[] args) {
+
+		final int ITERATION_COUNT = 1000;
 
 		State state = new State(
 			10, 10,
@@ -30,31 +32,22 @@ public class LocalTest {
 			)
 		);
 
-		Player p1 = new RandomPlayer(new LegalMoveGenerator());
-		p1.setState(state.clone());
-		Player p2 = new RandomPlayer(new LegalMoveGenerator());
-		p2.setState(state.clone());
+		Player white = new RandomPlayer(new LegalMoveGenerator());
+		Player black = new RandomPlayer(new LegalMoveGenerator());
 
-		long startTime = System.nanoTime();
-		while (true) {
-			System.out.println(state);
-			Player playerToMove, playerToWait;
-			if (state.getColorToMove() == Color.WHITE) {
-				playerToMove = p1;
-				playerToWait = p2;
-			} else {
-				playerToMove = p2;
-				playerToWait = p1;
-			}
-			Move move = playerToMove.play();
-			if (move == null) {
-				break;
-			}
-			playerToWait.play(move);
-			state.doMove(move);
-		}
-		long stopTime = System.nanoTime();
-		System.out.println(stopTime - startTime);
+		HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(state, white, black);
+		System.out.println("iteration count: " + ITERATION_COUNT);
+
+		long startTime = System.currentTimeMillis();
+		analyzer.play(ITERATION_COUNT);
+		long stopTime = System.currentTimeMillis();
+		System.out.println("execution time: " + (stopTime - startTime) + " ms");
+
+		System.out.println("white win-rate: " + analyzer.getWinRate(Color.WHITE));
+		System.out.println("black win-rate: " + analyzer.getWinRate(Color.BLACK));
+		System.out.println("white win-count: " + analyzer.getWinCount(Color.WHITE));
+		System.out.println("black win-count: " + analyzer.getWinCount(Color.BLACK));
+
 
 	}
 
