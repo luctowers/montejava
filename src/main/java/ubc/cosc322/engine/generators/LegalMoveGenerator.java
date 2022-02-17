@@ -2,7 +2,6 @@ package ubc.cosc322.engine.generators;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.MoveType;
