@@ -10,7 +10,7 @@ public class LocalTest {
 	
 	public static void main(String[] args) {
 
-		final int ITERATION_COUNT = 1000;
+		final int ITERATION_COUNT = 10_000;
 
 		State state = new State(); // standard 10x10 4 queen board
 
