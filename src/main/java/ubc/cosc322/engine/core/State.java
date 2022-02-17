@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import ubc.cosc322.engine.util.ConsoleColors;
+
 public class State {
 
 	public final int width;
@@ -203,24 +205,83 @@ public class State {
 	@Override
 	public String toString() { 
 		StringBuilder builder = new StringBuilder();
+		String horizontalLine = horiztonalLineString();
+		int highlightedBlank = -1;
+		int highlightedQueen = -1;
+		int highlightedArrow = -1;
+		if (moves.size() >= 1) {
+			Move move = moves.peek();
+			if (move.type == MoveType.QUEEN) {
+				highlightedBlank = boardIndex(move.source);
+				highlightedQueen = boardIndex(move.destination);
+			} else if (move.type == MoveType.ARROW) {
+				highlightedQueen = boardIndex(move.source);
+				highlightedArrow = boardIndex(move.destination);
+			}
+		}
+		builder.append(ConsoleColors.GREEN);
+		builder.append(horizontalLine);
+		builder.append('\n');
+		builder.append(ConsoleColors.RESET);
 		for (int i = 0; i < width * height; i++) {
+			if (i % width == 0) {
+				builder.append(ConsoleColors.GREEN);
+				builder.append('|');
+				builder.append(ConsoleColors.RESET);
+			}
+			builder.append(' ');
 			Piece piece = board[i];
 			if (piece == null) {
-				builder.append('.');
+				if (i == highlightedBlank) {
+					builder.append(ConsoleColors.YELLOW);
+					builder.append('!');
+				} else {
+					builder.append(' ');
+				}
 			} else if (piece == Piece.ARROW) {
+				if (i == highlightedArrow) {
+					builder.append(ConsoleColors.YELLOW);
+				} else {
+					builder.append(ConsoleColors.GREEN);
+				}
 				builder.append('*');
 			} else if (piece == Piece.WHITE_QUEEN) {
-				builder.append('w');
+				if (i == highlightedQueen) {
+					builder.append(ConsoleColors.YELLOW);
+				}
+				builder.append('W');
 			} else if (piece == Piece.BLACK_QUEEN) {
-				builder.append('b');
+				if (i == highlightedQueen) {
+					builder.append(ConsoleColors.YELLOW);
+				}
+				builder.append('B');
 			} else {
 				builder.append('?');
 			}
+			builder.append(ConsoleColors.RESET);
+			builder.append(ConsoleColors.GREEN);
+			builder.append(' ');
+			builder.append('|');
 			if (i % width == width - 1) {
 				builder.append('\n');
+				builder.append(horizontalLine);
+				builder.append('\n');
 			}
+			builder.append(ConsoleColors.RESET);
 		}
 		builder.append(colorToMove.toString() + " to make " + nextMoveType.toString() + " move");
+		return builder.toString();
+	}
+
+	private String horiztonalLineString() {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 4*width+1; i++) {
+			if (i % 4 == 0) {
+				builder.append('|');
+			} else {
+				builder.append('-');
+			}
+		}
 		return builder.toString();
 	}
 

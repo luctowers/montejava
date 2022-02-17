@@ -13,6 +13,7 @@ public class HeadToHeadAnalyzer {
 	State state;
 	Player whitePlayer, blackPlayer;
 	private Map<Color,Integer> winCounts;
+	private DebugOutput debugOutput;
 	
 	public HeadToHeadAnalyzer(State state, Player whitePlayer, Player blackPlayer) {
 		this.state = state;
@@ -21,6 +22,11 @@ public class HeadToHeadAnalyzer {
 		this.winCounts = new EnumMap<>(Color.class);
 		winCounts.put(Color.WHITE, Integer.valueOf(0));
 		winCounts.put(Color.BLACK, Integer.valueOf(0));
+		this.debugOutput = DebugOutput.NONE;
+	}
+
+	public void setDebugOutput(DebugOutput debugOutput) {
+		this.debugOutput = debugOutput;
 	}
 
 	public void play(int n) {
@@ -29,6 +35,9 @@ public class HeadToHeadAnalyzer {
 			whitePlayer.setState(state.clone());
 			blackPlayer.setState(state.clone());
 			while (true) {
+				if (debugOutput.outputAll) {
+					System.out.println(playState);
+				}
 				Player playerToMove, playerToWait;
 				if (state.getColorToMove() == Color.WHITE) {
 					playerToMove = whitePlayer;
@@ -44,7 +53,13 @@ public class HeadToHeadAnalyzer {
 				playerToWait.play(move);
 				playState.doMove(move);
 			}
+			if (debugOutput.outputOutcome && !debugOutput.outputAll) {
+				System.out.println(playState);
+			}
 			Color winner = playState.getColorToMove().other();
+			if (debugOutput.outputOutcome) {
+				System.out.println(winner.toString() + " wins");
+			}
 			winCounts.put(
 				winner,
 				Integer.valueOf(
