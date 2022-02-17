@@ -1,14 +1,10 @@
 package ubc.cosc322;
 
-import java.util.Arrays;
-
 import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.Position;
 import ubc.cosc322.engine.core.State;
-import ubc.cosc322.engine.generators.LegalMoveGenerator;
+import ubc.cosc322.engine.players.FastRandomPlayer;
 import ubc.cosc322.engine.players.Player;
-import ubc.cosc322.engine.players.RandomPlayer;
 
 public class LocalTest {
 	
@@ -18,8 +14,8 @@ public class LocalTest {
 
 		State state = new State(); // standard 10x10 4 queen board
 
-		Player white = new RandomPlayer(new LegalMoveGenerator());
-		Player black = new RandomPlayer(new LegalMoveGenerator());
+		Player white = new FastRandomPlayer(4);
+		Player black = new FastRandomPlayer(4);
 
 		HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(state, white, black);
 		System.out.println("iteration count: " + ITERATION_COUNT);
@@ -33,7 +29,6 @@ public class LocalTest {
 		System.out.println("black win-rate: " + analyzer.getWinRate(Color.BLACK));
 		System.out.println("white win-count: " + analyzer.getWinCount(Color.WHITE));
 		System.out.println("black win-count: " + analyzer.getWinCount(Color.BLACK));
-
 
 	}
 

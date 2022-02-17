@@ -7,13 +7,13 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
-public class RandomPlayer implements Player {
+public class UniformRandomPlayer implements Player {
 	
 	private State state;
 	private Random randomGenerator;
 	private MoveGenerator moveGenerator;
 
-	public RandomPlayer(MoveGenerator moveGenerator) {
+	public UniformRandomPlayer(MoveGenerator moveGenerator) {
 		this.moveGenerator = moveGenerator;
 		this.randomGenerator = new Random();
 	}

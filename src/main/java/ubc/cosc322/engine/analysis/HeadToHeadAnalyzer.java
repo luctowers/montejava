@@ -28,7 +28,7 @@ public class HeadToHeadAnalyzer {
 			State playState = state.clone();
 			whitePlayer.setState(state.clone());
 			blackPlayer.setState(state.clone());
-			for (Color c = Color.WHITE;; c = c.other()) {
+			while (true) {
 				Player playerToMove, playerToWait;
 				if (state.getColorToMove() == Color.WHITE) {
 					playerToMove = whitePlayer;

@@ -2,8 +2,8 @@ package ubc.cosc322.engine.generators;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-import ubc.cosc322.engine.core.Direction;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.Position;
@@ -26,7 +26,7 @@ public class LegalMoveGenerator implements MoveGenerator {
 	private List<Move> generateQueenMoves(State state) {
 		ArrayList<Move> moves = new ArrayList<>();
 		for (Position source : state.getQueens(state.getColorToMove())) {
-			for (Position destination : generateDestinations(state, source)) {
+			for (Position destination : state.traceAll(source)) {
 				moves.add(new Move(
 					MoveType.QUEEN,
 					source,
@@ -40,7 +40,7 @@ public class LegalMoveGenerator implements MoveGenerator {
 	private List<Move> generateArrowMoves(State state) {
 		ArrayList<Move> moves = new ArrayList<>();
 		Position source = state.getLastMovedQueen();
-		for (Position destination : generateDestinations(state, source)) {
+		for (Position destination : state.traceAll(source)) {
 			moves.add(new Move(
 				MoveType.ARROW,
 				source,
@@ -48,18 +48,6 @@ public class LegalMoveGenerator implements MoveGenerator {
 			));
 		}
 		return moves;
-	}
-
-	private List<Position> generateDestinations(State state, Position source) {
-		ArrayList<Position> destinations = new ArrayList<>(27);
-		for (Direction direction : Direction.values()) {
-			Position movedPosition = source.offset(direction);
-			while (state.positionValid(movedPosition) && state.getPiece(movedPosition) == null) {
-				destinations.add(movedPosition);
-				movedPosition = movedPosition.offset(direction);
-			}
-		}
-		return destinations;
 	}
 	
 }

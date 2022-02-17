@@ -2,10 +2,12 @@ package ubc.cosc322.engine.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Stream;
 
 public class State {
 
@@ -105,8 +107,8 @@ public class State {
 		board[boardIndex(newPosition)] = Piece.queenOfColor(color);
 	}
 
-	public Iterable<Position> getQueens(Color color) {
-		return queenPositions.get(color);
+	public List<Position> getQueens(Color color) {
+		return Collections.unmodifiableList(queenPositions.get(color));
 	}
 
 	public Color getColorToMove() {
@@ -124,6 +126,45 @@ public class State {
 		} else {
 			return null;
 		}
+	}
+
+	public List<Position> traceAll(Position source) {
+		ArrayList<Position> destinations = new ArrayList<>(27);
+		for (Direction direction : Direction.VALUES) {
+			int maxDistance = traceMaxDistance(source, direction);
+			Position movedPosition = source.offset(direction);
+			for (int i = 0; i < maxDistance && getPiece(movedPosition) == null; i++) {
+				destinations.add(movedPosition);
+				movedPosition = movedPosition.offset(direction);
+			}
+		}
+		return destinations;
+	}
+
+	public List<Position> traceDirection(Position source, Direction direction) {
+		ArrayList<Position> destinations = new ArrayList<>(9);
+		int maxDistance = traceMaxDistance(source, direction);
+		Position movedPosition = source.offset(direction);
+		for (int i = 0; i < maxDistance && getPiece(movedPosition) == null; i++) {
+			destinations.add(movedPosition);
+			movedPosition = movedPosition.offset(direction);
+		}
+		return destinations;
+	}
+
+	private int traceMaxDistance(Position source, Direction direction) {
+		int maxDistance = Integer.MAX_VALUE;
+		if (direction.x == 1) {
+			maxDistance = Math.min(maxDistance, width - source.x - 1);
+		} else if (direction.x == -1) {
+			maxDistance = Math.min(maxDistance, source.x);
+		}
+		if (direction.y == 1) {
+			maxDistance = Math.min(maxDistance, height - source.y - 1);
+		} else if (direction.y == -1) {
+			maxDistance = Math.min(maxDistance, source.y);
+		}
+		return maxDistance;
 	}
 
 	public Piece getPiece(int index) {
