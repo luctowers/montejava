@@ -277,7 +277,7 @@ public class State {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 4*width+1; i++) {
 			if (i % 4 == 0) {
-				builder.append('|');
+				builder.append('+');
 			} else {
 				builder.append('-');
 			}
