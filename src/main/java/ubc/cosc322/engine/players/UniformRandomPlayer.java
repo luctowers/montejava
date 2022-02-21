@@ -19,25 +19,23 @@ public class UniformRandomPlayer implements Player {
 	}
 
 	@Override
-	public void setState(State state) {
+	public void useState(State state) {
 		this.state = state;
 	}
 
 	@Override
-	public void play(Move move) {
+	public void doMove(Move move) {
 		state.doMove(move);
 	}
 
 	@Override
-	public Move play() {
+	public Move suggestMove() {
 		List<Move> moves = moveGenerator.generateMoves(state);
 		if (moves.size() == 0) {
 			return null;
 		}
 		int index = randomGenerator.nextInt(moves.size());
-		Move move = moves.get(index);
-		state.doMove(move);
-		return move;
+		return moves.get(index);
 	}
 
 }

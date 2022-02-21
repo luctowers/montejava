@@ -1,37 +1,35 @@
 package ubc.cosc322;
 
-import ubc.cosc322.engine.analysis.DebugOutput;
+import java.util.Random;
+
 import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.players.FastRandomPlayer;
 import ubc.cosc322.engine.players.Player;
+import ubc.cosc322.engine.players.UniformRandomPlayer;
 
 public class LocalTest {
 	
 	public static void main(String[] args) {
 
-		final int ITERATION_COUNT = 1000;
-		final DebugOutput DEBUG_OUTPUT = DebugOutput.OUTCOME;
+		final int ITERATION_COUNT = 100;
 
-		State state = new State(); // standard 10x10 4 queen board
+		State initialState = new State(); // standard 10x10 4 queen board
 
-		Player white = new FastRandomPlayer(4);
+		Player white = new UniformRandomPlayer(new LegalMoveGenerator());
 		Player black = new FastRandomPlayer(4);
 
-		HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(state, white, black);
-		analyzer.setDebugOutput(DEBUG_OUTPUT);
+		HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black);
+		analyzer.onMove(state -> System.out.println(state));
 		System.out.println("iteration count: " + ITERATION_COUNT);
 
 		long startTime = System.currentTimeMillis();
 		analyzer.play(ITERATION_COUNT);
 		long stopTime = System.currentTimeMillis();
 		long elapsed = stopTime - startTime;
-		if (DEBUG_OUTPUT != DebugOutput.NONE) {
-			System.out.println("execution time: " + elapsed + " ms (innacurate)");
-		} else {
-			System.out.println("execution time: " + elapsed + " ms");
-		}
+		System.out.println("execution time: " + elapsed + " ms");
 
 		System.out.println("white win-rate: " + analyzer.getWinRate(Color.WHITE));
 		System.out.println("black win-rate: " + analyzer.getWinRate(Color.BLACK));

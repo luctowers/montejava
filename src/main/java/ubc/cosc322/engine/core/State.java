@@ -205,7 +205,7 @@ public class State {
 	@Override
 	public String toString() { 
 		StringBuilder builder = new StringBuilder();
-		String horizontalLine = horiztonalLineString();
+		String line = horiztonalLine();
 		int highlightedBlank = -1;
 		int highlightedQueen = -1;
 		int highlightedArrow = -1;
@@ -220,7 +220,7 @@ public class State {
 			}
 		}
 		builder.append(ConsoleColors.GREEN);
-		builder.append(horizontalLine);
+		builder.append(line);
 		builder.append('\n');
 		builder.append(ConsoleColors.RESET);
 		for (int i = 0; i < width * height; i++) {
@@ -264,7 +264,7 @@ public class State {
 			builder.append('|');
 			if (i % width == width - 1) {
 				builder.append('\n');
-				builder.append(horizontalLine);
+				builder.append(line);
 				builder.append('\n');
 			}
 			builder.append(ConsoleColors.RESET);
@@ -273,7 +273,7 @@ public class State {
 		return builder.toString();
 	}
 
-	private String horiztonalLineString() {
+	private String horiztonalLine() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 4*width+1; i++) {
 			if (i % 4 == 0) {

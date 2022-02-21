@@ -21,17 +21,17 @@ public class FastRandomPlayer implements Player {
 	}
 
 	@Override
-	public void setState(State state) {
+	public void useState(State state) {
 		this.state = state;
 	}
 
 	@Override
-	public void play(Move move) {
+	public void doMove(Move move) {
 		state.doMove(move);
 	}
 
 	@Override
-	public Move play() {
+	public Move suggestMove() {
 		Move move = null;
 		for (int i = 0; i < maxFastAttempts && move == null; i++) {
 			move = randomMove();
@@ -42,7 +42,6 @@ public class FastRandomPlayer implements Player {
 		if (move == null) {
 			return null;
 		}
-		state.doMove(move);
 		return move;
 	}
 
