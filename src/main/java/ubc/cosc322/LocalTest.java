@@ -6,7 +6,8 @@ import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
-import ubc.cosc322.engine.players.FastRandomPlayer;
+import ubc.cosc322.engine.heuristics.MobilityHeuristic;
+import ubc.cosc322.engine.players.MiniMaxPlayer;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.UniformRandomPlayer;
 
@@ -14,15 +15,15 @@ public class LocalTest {
 	
 	public static void main(String[] args) {
 
-		final int ITERATION_COUNT = 100;
+		final int ITERATION_COUNT = 10;
 
 		State initialState = new State(); // standard 10x10 4 queen board
 
 		Player white = new UniformRandomPlayer(new LegalMoveGenerator());
-		Player black = new FastRandomPlayer(4);
+		Player black = new MiniMaxPlayer(new LegalMoveGenerator(), new MobilityHeuristic(), 3);
 
 		HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black);
-		analyzer.onMove(state -> System.out.println(state));
+		analyzer.onEnd(state -> System.out.println(state));
 		System.out.println("iteration count: " + ITERATION_COUNT);
 
 		long startTime = System.currentTimeMillis();

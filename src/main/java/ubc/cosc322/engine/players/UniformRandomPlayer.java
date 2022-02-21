@@ -7,9 +7,8 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
-public class UniformRandomPlayer implements Player {
+public class UniformRandomPlayer extends Player {
 	
-	private State state;
 	private Random randomGenerator;
 	private MoveGenerator moveGenerator;
 
