@@ -1,7 +1,5 @@
 package ubc.cosc322;
 
-import java.util.Random;
-
 import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;

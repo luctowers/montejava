@@ -37,7 +37,7 @@ public class MiniMaxPlayer extends Player {
 				state.doMove(move);
 				Node child = miniMax(depth-1, alpha, beta);
 				state.undoMove();
-				if (child.value > node.value) {
+				if (child.value >= node.value) {
 					node.child = child;
 					node.value = child.value;
 					node.move = move;
@@ -55,7 +55,7 @@ public class MiniMaxPlayer extends Player {
 				state.doMove(move);
 				Node child = miniMax(depth-1, alpha, beta);
 				state.undoMove();
-				if (child.value < node.value) {
+				if (child.value <= node.value) {
 					node.child = child;
 					node.value = child.value;
 					node.move = move;
