@@ -7,27 +7,15 @@ import ubc.cosc322.engine.core.Direction;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.Position;
-import ubc.cosc322.engine.core.State;
 
-public class FastRandomPlayer implements Player {
+public class FastRandomPlayer extends Player {
 
-	private State state;
 	private int maxFastAttempts;
 	private Random randomGenerator;
 
 	public FastRandomPlayer(int maxFastAttempts) {
 		this.maxFastAttempts = maxFastAttempts;
 		this.randomGenerator = new Random();
-	}
-
-	@Override
-	public void useState(State state) {
-		this.state = state;
-	}
-
-	@Override
-	public void doMove(Move move) {
-		state.doMove(move);
 	}
 
 	@Override

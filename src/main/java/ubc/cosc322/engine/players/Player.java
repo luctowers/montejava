@@ -3,12 +3,18 @@ package ubc.cosc322.engine.players;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 
-public interface Player {
+public abstract class Player {
 	
-	public void useState(State state);
+	protected State state;
 
-	public void doMove(Move move);
+	public void useState(State state) {
+		this.state = state;
+	}
 
-	public Move suggestMove();
+	public void doMove(Move move) {
+		state.doMove(move);
+	}
+
+	public abstract Move suggestMove();
 
 }

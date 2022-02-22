@@ -13,17 +13,17 @@ import ubc.cosc322.engine.players.Player;
 
 public class HeadToHeadAnalyzer {
 
-	State state;
+	State initialState;
 	Player whitePlayer, blackPlayer;
 	private Map<Color,Integer> winCounts;
 	private List<Consumer<State>> moveCallbacks;
 	private List<Consumer<State>> endCallbacks;
 	
-	public HeadToHeadAnalyzer(State state, Player whitePlayer, Player blackPlayer) {
+	public HeadToHeadAnalyzer(State initialState, Player whitePlayer, Player blackPlayer) {
 		if (whitePlayer == blackPlayer) {
 			throw new IllegalArgumentException("seperate players required");
 		}
-		this.state = state;
+		this.initialState = initialState;
 		this.whitePlayer = whitePlayer;
 		this.blackPlayer = blackPlayer;
 		this.winCounts = new EnumMap<>(Color.class);
@@ -35,15 +35,15 @@ public class HeadToHeadAnalyzer {
 
 	public void play(int n) {
 		for (int i = 0; i < n; i++) {
-			State playState = state.clone();
-			whitePlayer.useState(state.clone());
-			blackPlayer.useState(state.clone());
+			State playState = initialState.clone();
+			whitePlayer.useState(initialState.clone());
+			blackPlayer.useState(initialState.clone());
 			while (true) {
 				for (Consumer<State> callback : moveCallbacks) {
 					callback.accept(playState);
 				}
 				Player playerToMove, playerToWait;
-				if (state.getColorToMove() == Color.WHITE) {
+				if (playState.getColorToMove() == Color.WHITE) {
 					playerToMove = whitePlayer;
 					playerToWait = blackPlayer;
 				} else {
