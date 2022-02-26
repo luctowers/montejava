@@ -10,16 +10,31 @@ import java.util.Stack;
 
 import ubc.cosc322.engine.util.ConsoleColors;
 
+/** A complete mutable board state of the game of amazons. */
 public class State {
 
-	public final int width;
-	public final int height;
+	/** The dimensions of the board. */
+	public final int width, height;
+
+	/** A single dimensional array of size width*weight for piece lookups. */
 	private Piece[] board;
+
+	/** The next color that should make a move. */
 	private Color colorToMove;
+
+	/** The next move type that is expected. */
 	private MoveType nextMoveType;
+
+	/** A stack of previously performed moves. Used primarily to undo moves. */
 	private Stack<Move> moves;
+
+	/** A list of queen positions for each color. This is a helper structs that
+	 * allows easy location of queens without the need to iterate through the 
+	 * entire board. This is efficient because there aren't that many queens.
+	 */
 	private Map<Color,List<Position>> queenPositions;
 
+	/** A private constructor that is only used in the clone method. */
 	private State(int width, int height) {
 		this.width = width;
 		this.height = height;
