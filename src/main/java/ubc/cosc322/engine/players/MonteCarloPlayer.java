@@ -7,6 +7,7 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
+/** A player that uses a multi-threaded Monte Carlo Tree Search. */
 public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	volatile boolean running;

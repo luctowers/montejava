@@ -40,6 +40,7 @@ public class State {
 		this.height = height;
 	}
 
+	/** Creates a custom Amazons board of any size with any number of queens. */
 	public State(int width, int height, List<Position> whiteQueens, List<Position> blackQueens) {
 		this.width = width;
 		this.height = height;
@@ -58,7 +59,7 @@ public class State {
 		}
 	}
 
-	// standard initial board state
+	/** Creates a standard 10x10 amazons board with 4 queens per color. */
 	public State() {
 		this(
 			10, 10,
@@ -77,6 +78,7 @@ public class State {
 		);
 	}
 
+	/** Updates the game state by performing a move. */
 	public void doMove(Move move) {
 		switch (move.type) {
 			case QUEEN:
@@ -94,6 +96,7 @@ public class State {
 		moves.add(move);
 	}
 
+	/** Updates the game state by undoing the last move performed. */
 	public void undoMove() {
 		Move move = moves.pop();
 		switch (move.type) {
@@ -111,6 +114,7 @@ public class State {
 		}
 	}
 
+	/** Helper method to update a queen's position in both the board and helper structs. */
 	private void updateQueenPosition(Color color, Position oldPosition, Position newPosition) {
 		List<Position> positions = queenPositions.get(color);
 		for (int i = 0; i < positions.size(); i++) {
@@ -123,18 +127,22 @@ public class State {
 		board[boardIndex(newPosition)] = Piece.queenOfColor(color);
 	}
 
+	/** Get's an immutable list of teh positions of all queens of a given color. */
 	public List<Position> getQueens(Color color) {
 		return Collections.unmodifiableList(queenPositions.get(color));
 	}
 
+	/** Returns the next color that is expected to make a move. */
 	public Color getColorToMove() {
 		return colorToMove;
 	}
 
+	/** Returns the next move type that is expected. */
 	public MoveType getNextMoveType() {
 		return nextMoveType;
 	}
 
+	/** Gets the location of the last queen to move. Used to determine where arrows are shot from. */
 	public Position getLastMovedQueen() {
 		Move move = moves.peek();
 		if (move.type == MoveType.QUEEN) {
@@ -144,6 +152,7 @@ public class State {
 		}
 	}
 
+	/** Gets and the positions that can be reached orthogonally or diagonally from a position. */
 	public List<Position> traceAll(Position source) {
 		ArrayList<Position> destinations = new ArrayList<>(27);
 		for (Direction direction : Direction.VALUES) {
@@ -157,6 +166,7 @@ public class State {
 		return destinations;
 	}
 
+	/** Gets and the positions that can be reached in a given direction. */
 	public List<Position> traceDirection(Position source, Direction direction) {
 		ArrayList<Position> destinations = new ArrayList<>(9);
 		int maxDistance = traceMaxDistance(source, direction);
@@ -168,6 +178,7 @@ public class State {
 		return destinations;
 	}
 
+	/** Helper function to get the max distance before a trace would go off the board and out of bounds. */
 	private int traceMaxDistance(Position source, Direction direction) {
 		int maxDistance = Integer.MAX_VALUE;
 		if (direction.x == 1) {
@@ -183,18 +194,22 @@ public class State {
 		return maxDistance;
 	}
 
+	/** Gets the piece type at a given board index. */
 	public Piece getPiece(int index) {
 		return board[index];
 	}
 
+	/** Gets the piece type at a given board position. */
 	public Piece getPiece(Position position) {
 		return board[boardIndex(position)];
 	}
 
+	/** Calculates the board index of a position. */
 	public int boardIndex(Position position) {
 		return position.x + position.y * width;
 	}
 
+	/** Determines where a board position is on or off the board. */
 	public boolean positionValid(Position position) {
 		return (
 			position.x >= 0 && position.x < width &&
@@ -204,6 +219,7 @@ public class State {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	/** Copies the current state to a new object. */
 	public State clone()
     {
 		State cloneState = new State(width, height);
@@ -218,6 +234,7 @@ public class State {
     }
 
 	@Override
+	/** Creates a fancy colored console representation of the current board state. */
 	public String toString() { 
 		StringBuilder builder = new StringBuilder();
 		String line = horiztonalLine();
@@ -288,6 +305,7 @@ public class State {
 		return builder.toString();
 	}
 
+	/** Helper function for board toString. */
 	private String horiztonalLine() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 4*width+1; i++) {

@@ -8,6 +8,7 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.Position;
 
+/** A player that picks random moves as fast as possible. */
 public class FastRandomPlayer extends Player {
 
 	private int maxFastAttempts;

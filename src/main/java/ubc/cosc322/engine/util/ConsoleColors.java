@@ -1,5 +1,8 @@
 package ubc.cosc322.engine.util;
 
+/** A helper class that provides ANSI terminal color codes.
+ * NOTE: these don't workin Eclipse.
+ */
 public class ConsoleColors {
 	public static final String RESET = "\u001B[0m";
 	public static final String BLACK = "\u001B[30m";

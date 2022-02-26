@@ -4,9 +4,11 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Position;
 import ubc.cosc322.engine.core.State;
 
+/** A fast heuristic based of the mobility of a color's queens. */
 public class MobilityHeuristic implements Heuristic {
 
 	@Override
+	/** Returns the difference of the number new queen postions that a immediately reacheable by each team. */
 	public int evaluate(State state) {
 		int heuristic = 0;
 		// compute for both white and black
