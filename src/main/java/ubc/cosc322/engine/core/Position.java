@@ -1,7 +1,9 @@
 package ubc.cosc322.engine.core;
 
+/** A position on the Game of Amazons board. */
 public class Position {
 	
+    /** Zero-based coordinates of the position. */
 	public final int x, y;
 
 	public Position(int x, int y) {
@@ -9,20 +11,16 @@ public class Position {
 		this.y = y;
 	}
 
+    /** Returns a new position offset by a direction.
+     * @param direction The direction to offset in.
+     * @return The new position.
+     */
 	public Position offset(Direction direction) {
 		return new Position(x + direction.x, y + direction.y);
 	}
 
-	@Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof Position)) {
-            return false;
-        }
-        Position otherPosition = (Position) other;
-        return x == otherPosition.x && y == otherPosition.y;
+    public boolean equals(Position other) {
+        return x == other.x && y == other.y;
     }
 	
 }

@@ -5,6 +5,7 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.generators.MoveGenerator;
 import ubc.cosc322.engine.heuristics.Heuristic;
 
+/** A player that uses a depth limited Minimax search with a heuristic. */
 public class MiniMaxPlayer extends Player {
 
 	private MoveGenerator moveGenerator;

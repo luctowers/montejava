@@ -11,7 +11,7 @@ import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.players.Player;
 
-public class HeadToHeadAnalyzer {
+public class HeadToHeadAnalyzer implements AutoCloseable {
 
 	State initialState;
 	Player whitePlayer, blackPlayer;
@@ -89,6 +89,16 @@ public class HeadToHeadAnalyzer {
 
 	public void onEnd(Consumer<State> callback) {
 		endCallbacks.add(callback);
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (whitePlayer instanceof AutoCloseable) {
+			((AutoCloseable) whitePlayer).close();
+		}
+		if (blackPlayer instanceof AutoCloseable) {
+			((AutoCloseable) blackPlayer).close();
+		}
 	}
 
 }
