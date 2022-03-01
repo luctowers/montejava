@@ -50,7 +50,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		// rebase the search tree on the move if possible
 		boolean childFound = false;
 		for (int i = 0; i < root.children.length; i++) {
-			if (root.moves.get(i) == move) {
+			if (root.moves.get(i).equals(move)) {
 				root = root.children[i];
 				childFound = true;
 				break;
