@@ -17,7 +17,7 @@ public class LocalTest {
 
 		State initialState = new State(); // standard 10x10 4 queen board
 
-		Player white = new MonteCarloPlayer(new LegalMoveGenerator(), 7, 250, 1.4142);
+		Player white = new MonteCarloPlayer(new LegalMoveGenerator(), 7, 250, 0.3);
 		Player black = new MiniMaxPlayer(new LegalMoveGenerator(), new MobilityHeuristic(), 4);
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
