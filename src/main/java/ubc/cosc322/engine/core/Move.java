@@ -20,4 +20,8 @@ public class Move {
 		this.destination = destination;
 	}
 
+	public boolean equals(Move other) {
+        return source == other.source && destination == other.destination && type == other.type;
+    }
+
 }

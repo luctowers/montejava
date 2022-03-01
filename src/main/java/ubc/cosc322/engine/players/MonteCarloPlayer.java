@@ -47,10 +47,22 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	@Override
 	public void doMove(Move move) {
+		// rebase the search tree on the move if possible
+		boolean childFound = false;
+		for (int i = 0; i < root.children.length; i++) {
+			if (root.moves.get(i) == move) {
+				root = root.children[i];
+				childFound = true;
+				break;
+			}
+		}
 		super.doMove(move);
-		this.root = new Node();
-		this.root.moves = moveGenerator.generateMoves(state);
-		this.root.children = new Node[this.root.moves.size()];
+		// didn't find the move to rebase, need to start from scratch
+		if (!childFound) {
+			this.root = new Node();
+			this.root.moves = moveGenerator.generateMoves(state);
+			this.root.children = new Node[this.root.moves.size()];
+		}
 	}
 
 	@Override
