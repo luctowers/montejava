@@ -1,6 +1,7 @@
 package ubc.cosc322.engine.players;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Move;
@@ -11,6 +12,7 @@ import ubc.cosc322.engine.generators.MoveGenerator;
 public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	volatile boolean running;
+	Supplier<Player> rolloutPlayerSupplier;
 	MoveGenerator moveGenerator;
 	int millisecondsPerMove;
 	double explorationFactor;
@@ -18,12 +20,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	volatile Node root;
 	int threadCount;
 
-	public MonteCarloPlayer(MoveGenerator moveGenerator, int threadCount, int millisecondsPerMove, double explorationFactor) {
+	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int millisecondsPerMove, double explorationFactor) {
 		this.running = false;
 		this.moveGenerator = moveGenerator;
 		this.millisecondsPerMove = millisecondsPerMove;
 		this.explorationFactor = explorationFactor;
 		this.threadCount = threadCount;
+		this.rolloutPlayerSupplier = rolloutPlayerSupplier;
 	}
 
 	@Override
@@ -34,9 +37,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			e.printStackTrace();
 		}
 		super.useState(state);
-		this.root = new Node();
-		this.root.moves = moveGenerator.generateMoves(state);
-		this.root.children = new Node[this.root.moves.size()];
+		this.root = new Node(state);
 		running = true;
 		this.workerThreads = new Thread[threadCount];
 		for (int i = 0; i < threadCount; i++) {
@@ -51,17 +52,18 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		boolean childFound = false;
 		for (int i = 0; i < root.children.length; i++) {
 			if (root.moves.get(i).equals(move)) {
-				root = root.children[i];
-				childFound = true;
+				Node child = root.children[i];
+				if  (child != null) {
+					root = root.children[i];
+					childFound = true;
+				}
 				break;
 			}
 		}
 		super.doMove(move);
 		// didn't find the move to rebase, need to start from scratch
 		if (!childFound) {
-			this.root = new Node();
-			this.root.moves = moveGenerator.generateMoves(state);
-			this.root.children = new Node[this.root.moves.size()];
+			this.root = new Node(state);
 		}
 	}
 
@@ -97,7 +99,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		private Player rolloutPlayer;
 
 		public Worker() {
-			this.rolloutPlayer = new FastRandomPlayer(4);
+			this.rolloutPlayer = rolloutPlayerSupplier.get();
 		}
 
 		@Override
@@ -114,11 +116,6 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		}
 
 		public int search(Node node, State state) {
-
-			if (node.moves == null || node.children == null) {
-				node.moves = moveGenerator.generateMoves(state);
-				node.children = new Node[node.moves.size()];
-			}
 
 			double maxScore = 0.0;
 			Move selecteMove = null;
@@ -137,9 +134,9 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 					// perform simulation
 					state.doMove(node.moves.get(i));
+					Node leaf = new Node(state);
 					int simulationResult = simulate(state);
 					// record simulation in leaf and attach leaf to parent
-					Node leaf = new Node();
 					leaf.whiteWins = simulationResult;
 					leaf.simulations = 1;
 					node.children[i] = leaf;
@@ -204,10 +201,17 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	}
 
 	private class Node {
+
 		public List<Move> moves;
 		public Node[] children;
 		public int simulations;
 		public int whiteWins;
+
+		public Node(State state) {
+			moves = moveGenerator.generateMoves(state);
+			children = new Node[moves.size()];
+		}
+
 	}
 
 	@Override
