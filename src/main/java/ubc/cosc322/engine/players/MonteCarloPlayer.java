@@ -123,7 +123,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			for (int i = 0; i < node.children.length; i++) {
 				if (node.children[i] != null) {
 
-					double score = uct(node, node.children[i], state.getColorToMove());
+					double score = ucb1(node, node.children[i], state.getColorToMove());
 					if (score > maxScore) {
 						maxScore = score;
 						selecteMove = node.moves.get(i);
@@ -187,7 +187,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		
 	}
 
-	private double uct(Node parent, Node child, Color color) {
+	private double ucb1(Node parent, Node child, Color color) {
 		double winRatio = computeWinRatio(child, color);
 		return winRatio + explorationFactor * Math.sqrt( Math.log(parent.simulations) / child.simulations );
 	}
