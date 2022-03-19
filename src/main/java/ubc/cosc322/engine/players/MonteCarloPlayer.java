@@ -1,11 +1,13 @@
 package ubc.cosc322.engine.players;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
 /** A player that uses a multi-threaded Monte Carlo Tree Search. */
@@ -74,25 +76,58 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		double maxWinRatio = 0.0;
-		Move selecteMove = null;
-		for (int i = 0; i < root.children.length; i++) {
-			Node child = root.children[i];
-			if (child == null) {
-				if (maxWinRatio == 0.0) {
-					return root.moves.get(i);
-				} else {
+		List<Move> moves = suggestMultiple(1); 
+		if (moves.size() != 1) {
+			return null;
+		}
+		return moves.get(0);
+	}
+
+	@Override
+	public Turn suggestTurn() {
+		try {
+			Thread.sleep(2*millisecondsPerMove);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		List<Move> moves = suggestMultiple(2); 
+		if (moves.size() != 2) {
+			return null;
+		}
+		return new Turn(moves.get(0), moves.get(1));
+	}
+
+	private List<Move> suggestMultiple(int n) {
+		List<Move> moves = new ArrayList<>();
+		Node node = root;
+		for (int d = 0; d < n && node != null; d++) {
+			double maxWinRatio = 0.0;
+			Move selectedMove = null;
+			Node selectedChild = null;
+			for (int i = 0; i < node.children.length; i++) {
+				Node child = node.children[i];
+				if (child == null) {
+					if (selectedMove == null) {
+						selectedMove = node.moves.get(i);
+						selectedChild = child;
+					}
 					break;
 				}
+				double winRatio = computeWinRatio(child, state.getColorToMove());
+				if (winRatio >= maxWinRatio) {
+					maxWinRatio = winRatio;
+					selectedMove = node.moves.get(i);
+					selectedChild = child;
+				}
 			}
-			double winRatio = computeWinRatio(child, state.getColorToMove());
-			if (winRatio >= maxWinRatio) {
-				maxWinRatio = winRatio;
-				selecteMove = root.moves.get(i);
+			if (selectedMove != null) {
+				moves.add(selectedMove);
 			}
+			node = selectedChild;
 		}
-		return selecteMove;
+		return moves;
 	}
+
 
 	private class Worker implements Runnable {
 

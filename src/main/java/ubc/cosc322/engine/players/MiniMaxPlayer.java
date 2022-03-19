@@ -2,6 +2,7 @@ package ubc.cosc322.engine.players;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Move;
+import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.MoveGenerator;
 import ubc.cosc322.engine.heuristics.Heuristic;
 
@@ -21,6 +22,18 @@ public class MiniMaxPlayer extends Player {
 	@Override
 	public Move suggestMove() {
 		return miniMax(maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE).move;
+	}
+
+	@Override
+	public Turn suggestTurn() {
+		Node node = miniMax(maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		if (node.child == null) {
+			return null;
+		}
+		return new Turn(
+			node.move,
+			node.child.move
+		);
 	}
 
 	private Node miniMax(int depth, int alpha, int beta) {

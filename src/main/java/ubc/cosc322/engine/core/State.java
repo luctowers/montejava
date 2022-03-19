@@ -96,6 +96,11 @@ public class State {
 		moves.add(move);
 	}
 
+	public void doTurn(Turn turn) {
+		doMove(turn.queenMove());
+		doMove(turn.arrowMove());
+	}
+
 	/** Updates the game state by undoing the last move performed. */
 	public void undoMove() {
 		Move move = moves.pop();
@@ -112,6 +117,11 @@ public class State {
 			default:
 				throw new IllegalArgumentException("Illegal move type");
 		}
+	}
+
+	public void undoTurn(Turn turn) {
+		undoMove();
+		undoMove();
 	}
 
 	/** Helper method to update a queen's position in both the board and helper structs. */
