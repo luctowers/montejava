@@ -59,6 +59,14 @@ public class State {
 		}
 	}
 
+	/** Creates a custom Amazons board of any size with any number of queens and some pre-existing arrows. */
+	public State(int width, int height, List<Position> whiteQueens, List<Position> blackQueens, List<Position> arrows) {
+		this(width, height, whiteQueens, blackQueens);
+		for (Position arrow : arrows) {
+			board[boardIndex(arrow)] = Piece.ARROW;
+		}
+	}
+
 	/** Creates a standard 10x10 amazons board with 4 queens per color. */
 	public State() {
 		this(
@@ -96,6 +104,12 @@ public class State {
 		moves.add(move);
 	}
 
+	/** Updates the game state by performing a turn (2 moves by one player). */
+	public void doTurn(Turn turn) {
+		doMove(turn.queenMove());
+		doMove(turn.arrowMove());
+	}
+
 	/** Updates the game state by undoing the last move performed. */
 	public void undoMove() {
 		Move move = moves.pop();
@@ -112,6 +126,12 @@ public class State {
 			default:
 				throw new IllegalArgumentException("Illegal move type");
 		}
+	}
+
+	/** Updates the game state by undoing the last two moves performed. */
+	public void undoTurn(Turn turn) {
+		undoMove();
+		undoMove();
 	}
 
 	/** Helper method to update a queen's position in both the board and helper structs. */
@@ -247,6 +267,10 @@ public class State {
 				highlightedBlank = boardIndex(move.source);
 				highlightedQueen = boardIndex(move.destination);
 			} else if (move.type == MoveType.ARROW) {
+				if (moves.size() >= 2) {
+					Move previousMove = moves.get(moves.size()-2);
+					highlightedBlank = boardIndex(previousMove.source);
+				}
 				highlightedQueen = boardIndex(move.source);
 				highlightedArrow = boardIndex(move.destination);
 			}

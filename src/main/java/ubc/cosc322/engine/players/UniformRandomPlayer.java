@@ -8,7 +8,7 @@ import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
 /** A player that picks random moves with uniform probability. */
-public class UniformRandomPlayer extends Player {
+public class UniformRandomPlayer extends DiscreteMovePlayer {
 	
 	private Random randomGenerator;
 	private MoveGenerator moveGenerator;

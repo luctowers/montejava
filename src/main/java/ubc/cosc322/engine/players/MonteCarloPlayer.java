@@ -1,16 +1,20 @@
 package ubc.cosc322.engine.players;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.MoveGenerator;
 
 /** A player that uses a multi-threaded Monte Carlo Tree Search. */
 public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	volatile boolean running;
+	Supplier<Player> rolloutPlayerSupplier;
 	MoveGenerator moveGenerator;
 	int millisecondsPerMove;
 	double explorationFactor;
@@ -18,12 +22,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	volatile Node root;
 	int threadCount;
 
-	public MonteCarloPlayer(MoveGenerator moveGenerator, int threadCount, int millisecondsPerMove, double explorationFactor) {
+	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int millisecondsPerMove, double explorationFactor) {
 		this.running = false;
 		this.moveGenerator = moveGenerator;
 		this.millisecondsPerMove = millisecondsPerMove;
 		this.explorationFactor = explorationFactor;
 		this.threadCount = threadCount;
+		this.rolloutPlayerSupplier = rolloutPlayerSupplier;
 	}
 
 	@Override
@@ -34,9 +39,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			e.printStackTrace();
 		}
 		super.useState(state);
-		this.root = new Node();
-		this.root.moves = moveGenerator.generateMoves(state);
-		this.root.children = new Node[this.root.moves.size()];
+		this.root = new Node(state);
 		running = true;
 		this.workerThreads = new Thread[threadCount];
 		for (int i = 0; i < threadCount; i++) {
@@ -47,10 +50,23 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	@Override
 	public void doMove(Move move) {
+		// rebase the search tree on the move if possible
+		boolean childFound = false;
+		for (int i = 0; i < root.children.length; i++) {
+			if (root.moves.get(i).equals(move)) {
+				Node child = root.children[i];
+				if  (child != null) {
+					root = root.children[i];
+					childFound = true;
+				}
+				break;
+			}
+		}
 		super.doMove(move);
-		this.root = new Node();
-		this.root.moves = moveGenerator.generateMoves(state);
-		this.root.children = new Node[this.root.moves.size()];
+		// didn't find the move to rebase, need to start from scratch
+		if (!childFound) {
+			this.root = new Node(state);
+		}
 	}
 
 	@Override
@@ -60,32 +76,65 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		double maxWinRatio = 0.0;
-		Move selecteMove = null;
-		for (int i = 0; i < root.children.length; i++) {
-			Node child = root.children[i];
-			if (child == null) {
-				if (maxWinRatio == 0.0) {
-					return root.moves.get(i);
-				} else {
+		List<Move> moves = suggestMultiple(1); 
+		if (moves.size() != 1) {
+			return null;
+		}
+		return moves.get(0);
+	}
+
+	@Override
+	public Turn suggestTurn() {
+		try {
+			Thread.sleep(2*millisecondsPerMove);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		List<Move> moves = suggestMultiple(2); 
+		if (moves.size() != 2) {
+			return null;
+		}
+		return new Turn(moves.get(0), moves.get(1));
+	}
+
+	private List<Move> suggestMultiple(int n) {
+		List<Move> moves = new ArrayList<>();
+		Node node = root;
+		for (int d = 0; d < n && node != null; d++) {
+			double maxWinRatio = 0.0;
+			Move selectedMove = null;
+			Node selectedChild = null;
+			for (int i = 0; i < node.children.length; i++) {
+				Node child = node.children[i];
+				if (child == null) {
+					if (selectedMove == null) {
+						selectedMove = node.moves.get(i);
+						selectedChild = child;
+					}
 					break;
 				}
+				double winRatio = computeWinRatio(child, state.getColorToMove());
+				if (winRatio >= maxWinRatio) {
+					maxWinRatio = winRatio;
+					selectedMove = node.moves.get(i);
+					selectedChild = child;
+				}
 			}
-			double winRatio = computeWinRatio(child, state.getColorToMove());
-			if (winRatio >= maxWinRatio) {
-				maxWinRatio = winRatio;
-				selecteMove = root.moves.get(i);
+			if (selectedMove != null) {
+				moves.add(selectedMove);
 			}
+			node = selectedChild;
 		}
-		return selecteMove;
+		return moves;
 	}
+
 
 	private class Worker implements Runnable {
 
 		private Player rolloutPlayer;
 
 		public Worker() {
-			this.rolloutPlayer = new FastRandomPlayer(4);
+			this.rolloutPlayer = rolloutPlayerSupplier.get();
 		}
 
 		@Override
@@ -103,18 +152,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 		public int search(Node node, State state) {
 
-			if (node.moves == null || node.children == null) {
-				node.moves = moveGenerator.generateMoves(state);
-				node.children = new Node[node.moves.size()];
-			}
-
 			double maxScore = 0.0;
 			Move selecteMove = null;
 			Node selectedChild = null;
 			for (int i = 0; i < node.children.length; i++) {
 				if (node.children[i] != null) {
 
-					double score = uct(node, node.children[i], state.getColorToMove());
+					double score = ucb1(node, node.children[i], state.getColorToMove());
 					if (score > maxScore) {
 						maxScore = score;
 						selecteMove = node.moves.get(i);
@@ -125,9 +169,9 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 					// perform simulation
 					state.doMove(node.moves.get(i));
+					Node leaf = new Node(state);
 					int simulationResult = simulate(state);
 					// record simulation in leaf and attach leaf to parent
-					Node leaf = new Node();
 					leaf.whiteWins = simulationResult;
 					leaf.simulations = 1;
 					node.children[i] = leaf;
@@ -178,7 +222,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		
 	}
 
-	private double uct(Node parent, Node child, Color color) {
+	private double ucb1(Node parent, Node child, Color color) {
 		double winRatio = computeWinRatio(child, color);
 		return winRatio + explorationFactor * Math.sqrt( Math.log(parent.simulations) / child.simulations );
 	}
@@ -191,11 +235,22 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		return Math.min(Math.max(0.0, ratio), 1.0);
 	}
 
+	public double computeWinRatio(Color color) {
+		return computeWinRatio(root, color);
+	}
+
 	private class Node {
+
 		public List<Move> moves;
 		public Node[] children;
 		public int simulations;
 		public int whiteWins;
+
+		public Node(State state) {
+			moves = moveGenerator.generateMoves(state);
+			children = new Node[moves.size()];
+		}
+
 	}
 
 	@Override

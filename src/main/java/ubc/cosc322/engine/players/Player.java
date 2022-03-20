@@ -2,6 +2,7 @@ package ubc.cosc322.engine.players;
 
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Turn;
 
 /** An interface that abstracts a Game of Amazons player. */
 public abstract class Player {
@@ -12,10 +13,21 @@ public abstract class Player {
 		this.state = state;
 	}
 
+	public State getState() {
+		return state;
+	}
+
 	public void doMove(Move move) {
 		state.doMove(move);
 	}
 
+	public void doTurn(Turn turn) {
+		doMove(turn.queenMove());
+		doMove(turn.arrowMove());
+	}
+
 	public abstract Move suggestMove();
+
+	public abstract Turn suggestTurn();
 
 }
