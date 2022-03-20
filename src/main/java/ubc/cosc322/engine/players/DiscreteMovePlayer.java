@@ -3,6 +3,9 @@ package ubc.cosc322.engine.players;
 import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.Turn;
 
+/** an abstract player who's suggestion of moves are entirely based on the internal
+ * state at the calling of suggest move.
+ */
 public abstract class DiscreteMovePlayer extends Player {
 	
 	@Override
@@ -13,10 +16,10 @@ public abstract class DiscreteMovePlayer extends Player {
 		}
 		state.doMove(queenMove);
 		Move arrowMove = suggestMove();
+		state.undoMove();
 		if (arrowMove == null) {
 			return null;
 		}
-		state.undoMove();
 		return new Turn(queenMove, arrowMove);
 	}
 
