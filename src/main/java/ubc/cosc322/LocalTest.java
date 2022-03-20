@@ -4,10 +4,11 @@ import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
+import ubc.cosc322.engine.heuristics.MobilityHeuristic;
 import ubc.cosc322.engine.players.FastRandomPlayer;
+import ubc.cosc322.engine.players.MiniMaxPlayer;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.Player;
-import ubc.cosc322.engine.players.UniformRandomPlayer;
 
 public class LocalTest {
 	
@@ -17,8 +18,8 @@ public class LocalTest {
 
 		State initialState = new State(); // standard 10x10 4 queen board
 
-		Player white = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new FastRandomPlayer(4),  4, 10000, 0.3);
-		Player black = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new UniformRandomPlayer(new LegalMoveGenerator()),  4, 10000, 0.3);
+		Player white = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new FastRandomPlayer(4), 4, 250, 0.3);
+		Player black = new MiniMaxPlayer(new LegalMoveGenerator(), new MobilityHeuristic(), 4);
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
 
