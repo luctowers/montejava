@@ -96,6 +96,7 @@ public class State {
 		moves.add(move);
 	}
 
+	/** Updates the game state by performing a turn (2 moves by one player). */
 	public void doTurn(Turn turn) {
 		doMove(turn.queenMove());
 		doMove(turn.arrowMove());
@@ -119,6 +120,7 @@ public class State {
 		}
 	}
 
+	/** Updates the game state by undoing the last two moves performed. */
 	public void undoTurn(Turn turn) {
 		undoMove();
 		undoMove();
@@ -257,6 +259,10 @@ public class State {
 				highlightedBlank = boardIndex(move.source);
 				highlightedQueen = boardIndex(move.destination);
 			} else if (move.type == MoveType.ARROW) {
+				if (moves.size() >= 2) {
+					Move previousMove = moves.get(moves.size()-2);
+					highlightedBlank = boardIndex(previousMove.source);
+				}
 				highlightedQueen = boardIndex(move.source);
 				highlightedArrow = boardIndex(move.destination);
 			}

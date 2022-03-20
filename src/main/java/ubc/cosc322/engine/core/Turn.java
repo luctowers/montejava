@@ -1,5 +1,6 @@
 package ubc.cosc322.engine.core;
 
+/** A single turn in the Game of Amazons. A turn has two moves, a queen move and an arrow move. */
 public class Turn {
 	
 	/** The positions involved in a turn.
