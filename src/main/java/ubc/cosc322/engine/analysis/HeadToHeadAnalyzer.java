@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import ubc.cosc322.engine.core.Color;
+import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
-import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.players.Player;
 
 public class HeadToHeadAnalyzer implements AutoCloseable {
@@ -50,13 +50,13 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 					playerToMove = blackPlayer;
 					playerToWait = whitePlayer;
 				}
-				Turn turn = playerToMove.suggestTurn();
-				if (turn == null) {
+				Move move = playerToMove.suggestMove();
+				if (move == null) {
 					break;
 				}
-				playerToMove.doTurn(turn);
-				playerToWait.doTurn(turn);
-				playState.doTurn(turn);
+				playerToMove.doMove(move);
+				playerToWait.doMove(move);
+				playState.doMove(move);
 			}
 			for (Consumer<State> callback : endCallbacks) {
 				callback.accept(playState);
