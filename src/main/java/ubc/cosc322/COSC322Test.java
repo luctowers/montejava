@@ -198,7 +198,6 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OPPONENT'S turn, we are " + aiColor);
 		}
-		ai
 	}
 
 	/** decodes the servers board state format and converts it to our format */
