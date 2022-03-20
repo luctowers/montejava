@@ -235,6 +235,10 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		return Math.min(Math.max(0.0, ratio), 1.0);
 	}
 
+	public double computeWinRatio(Color color) {
+		return computeWinRatio(root, color);
+	}
+
 	private class Node {
 
 		public List<Move> moves;

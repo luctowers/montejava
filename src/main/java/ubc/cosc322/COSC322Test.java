@@ -155,8 +155,10 @@ public class COSC322Test extends GamePlayer {
 				queenDestination = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.QUEEN_POS_NEXT);
 				arrowDestination = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.ARROW_POS);
 				Turn turn = decodeTurn(queenSource, queenDestination, arrowDestination);
+				double winRatio = ai.computeWinRatio(Color.WHITE);
 				ai.doTurn(turn);
 				logState();
+				logWinRatio(winRatio);
 				makeMove();
 				break;
 		}
@@ -170,8 +172,14 @@ public class COSC322Test extends GamePlayer {
 			return;
 		}
 		Turn turn = ai.suggestTurn();
+		if (turn == null) {
+			System.out.println("OUR ai thinks it has LOST");
+			return;
+		}
+		double winRatio = ai.computeWinRatio(Color.WHITE);
 		ai.doTurn(turn);
 		logState();
+		logWinRatio(winRatio);
 		ArrayList<Integer> queenSource = new ArrayList<>();
 		queenSource.add(10 - turn.queenSource.y);
 		queenSource.add(turn.queenSource.x + 1);
@@ -198,6 +206,27 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OPPONENT'S turn, we are " + aiColor);
 		}
+	}
+
+	/** logging who the ai thinks is winning */
+	private void logWinRatio(double winRatio) {
+		double winPercentage = Math.round(1000.0 * winRatio) / 10.0;
+		if (aiColor == Color.WHITE) {
+			System.out.println("OUR ai thinks WE have a " + winPercentage + "% chance of WINNING");
+		} else if (aiColor == Color.BLACK) {
+			System.out.println("OUR ai thinks WE have a " + (100.0-winPercentage) + "% chance of WINNING");
+		} else {
+			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
+		}
+		double i = 1.0 / 80.0;
+		System.out.print("[");
+		for (; i < winRatio; i += 1.0 / 80.0) {
+			System.out.print("█");
+		}
+		for (; i <= 1.0; i += 1.0 / 80.0) {
+			System.out.print(" ");
+		}
+		System.out.println("]");
 	}
 
 	/** decodes the servers board state format and converts it to our format */
