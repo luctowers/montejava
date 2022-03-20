@@ -11,7 +11,6 @@ import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.UniformRandomPlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
@@ -218,15 +217,17 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
-		double i = 1.0 / 80.0;
-		System.out.print("[");
-		for (; i < winRatio; i += 1.0 / 80.0) {
-			System.out.print("█");
+		double i = 1.0 / 64.0;
+		StringBuilder winBar = new StringBuilder();
+		winBar.append("[");
+		for (; i < winRatio; i += 1.0 / 64.0) {
+			winBar.append("█");
 		}
-		for (; i <= 1.0; i += 1.0 / 80.0) {
-			System.out.print(" ");
+		for (; i <= 1.0; i += 1.0 / 64.0) {
+			winBar.append(" ");
 		}
-		System.out.println("]");
+		winBar.append("]");
+		System.out.println(winBar);
 	}
 
 	/** decodes the servers board state format and converts it to our format */
