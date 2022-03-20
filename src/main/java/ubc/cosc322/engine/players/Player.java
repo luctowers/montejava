@@ -13,13 +13,17 @@ public abstract class Player {
 		this.state = state;
 	}
 
+	public State getState() {
+		return state;
+	}
+
 	public void doMove(Move move) {
 		state.doMove(move);
 	}
 
 	public void doTurn(Turn turn) {
-		state.doMove(turn.queenMove());
-		state.doMove(turn.arrowMove());
+		doMove(turn.queenMove());
+		doMove(turn.arrowMove());
 	}
 
 	public abstract Move suggestMove();
