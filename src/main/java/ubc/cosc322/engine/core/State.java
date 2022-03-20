@@ -59,6 +59,14 @@ public class State {
 		}
 	}
 
+	/** Creates a custom Amazons board of any size with any number of queens and some pre-existing arrows. */
+	public State(int width, int height, List<Position> whiteQueens, List<Position> blackQueens, List<Position> arrows) {
+		this(width, height, whiteQueens, blackQueens);
+		for (Position arrow : arrows) {
+			board[boardIndex(arrow)] = Piece.ARROW;
+		}
+	}
+
 	/** Creates a standard 10x10 amazons board with 4 queens per color. */
 	public State() {
 		this(

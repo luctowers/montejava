@@ -239,17 +239,20 @@ public class COSC322Test extends GamePlayer {
 		}
 		ArrayList<Position> whiteQueens = new ArrayList<>();
 		ArrayList<Position> blackQueens = new ArrayList<>();
+		ArrayList<Position> arrows = new ArrayList<>();
 		for (int x = 1; x <= 10; x++) {
 			for (int y = 1; y <= 10; y++) {
-				int piece = board.get(x+y*11);
+				int piece = board.get(x+(11-y)*11);
 				if (piece == 1) {
-					whiteQueens.add(new Position(x - 1, y - 1));
-				} else if (piece == 2) {
 					blackQueens.add(new Position(x - 1, y - 1));
+				} else if (piece == 2) {
+					whiteQueens.add(new Position(x - 1, y - 1));
+				} else if (piece == 3) {
+					arrows.add(new Position(x - 1, y - 1));
 				}
 			}
 		}
-		return new State(10, 10, whiteQueens, blackQueens);
+		return new State(10, 10, whiteQueens, blackQueens, arrows);
 	}
 
 	/** decodes the server's turn format and converts it to our format */
