@@ -127,6 +127,8 @@ public class COSC322Test extends GamePlayer {
 				State state = decodeBoardState(board);
 				System.out.println(state);
 				ai.useState(state);
+				// reset aiColor in-case it was set in a previous game
+				aiColor = null;
 				break;
 			case GameMessage.GAME_ACTION_START:
 				// game has started, check who's turn it is and make a move if it our turn
