@@ -21,6 +21,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	private Thread[] workerThreads;
 	private volatile Node root;
 	private int threadCount;
+	private int maxDepth;
 
 	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int millisecondsPerMove, double explorationFactor) {
 		this.running = false;
@@ -40,7 +41,8 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		}
 		super.useState(state);
 		this.root = new Node(state);
-		running = true;
+		this.running = true;
+		this.maxDepth = 0;
 		this.workerThreads = new Thread[threadCount];
 		for (int i = 0; i < threadCount; i++) {
 			this.workerThreads[i] = new Thread(new Worker());
@@ -50,6 +52,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	@Override
 	public void doMove(Move move) {
+		this.maxDepth = 0;
 		// rebase the search tree on the move if possible
 		boolean childFound = false;
 		for (int i = 0; i < root.children.length; i++) {
@@ -73,6 +76,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		Stats stats = new Stats();
 		stats.whiteWinRatio = computeWinRatio(Color.WHITE);
 		stats.simulations = root.simulations;
+		stats.maxDepth = maxDepth;
 		return stats;
 	}
 
@@ -149,7 +153,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			while (running) {
 				if (root != null) {
 					try {
-						search(root, state.clone());
+						search(root, state.clone(), 1);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -157,7 +161,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			}
 		}
 
-		public int search(Node node, State state) {
+		private int search(Node node, State state, int depth) {
+
+			if (depth > maxDepth) {
+				maxDepth = depth;
+			}
 
 			double maxScore = 0.0;
 			Move selecteMove = null;
@@ -204,7 +212,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			} else {
 
 				state.doMove(selecteMove);
-				int result = search(selectedChild, state);
+				int result = search(selectedChild, state, depth+1);
 				node.simulations += 1;
 				node.whiteWins += result;
 				return result;
@@ -264,6 +272,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 		public double whiteWinRatio;
 		public int simulations;
+		public int maxDepth;
 
 	}
 

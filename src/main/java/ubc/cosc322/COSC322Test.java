@@ -230,7 +230,7 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
-		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.simulations) + " simulations performed");
+		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.simulations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
 	}
 	
 	@Override
