@@ -78,7 +78,7 @@ public class COSC322Test extends GamePlayer {
 		// create the monte carlo ai
 		// uniform random rollout player
 		// availableProcessors returns the number of cores in the system
-		// 14000ms = 14sec per half-turn 28sec < 30sec deadlin
+		// 14000ms = 14sec per half-turn 28sec < 30sec deadline
 		// 0.3 exploration factor 
 		this.ai = new MonteCarloPlayer(
 			new LegalMoveGenerator(),
@@ -219,17 +219,6 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
-		double i = 1.0 / 64.0;
-		StringBuilder winBar = new StringBuilder();
-		winBar.append("[");
-		for (; i < winRatio; i += 1.0 / 64.0) {
-			winBar.append("█");
-		}
-		for (; i <= 1.0; i += 1.0 / 64.0) {
-			winBar.append(" ");
-		}
-		winBar.append("]");
-		System.out.println(winBar);
 	}
 
 	/** decodes the servers board state format and converts it to our format */
