@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Random;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.Position;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
@@ -19,6 +18,8 @@ import ygraph.ai.smartfox.games.GamePlayer;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
 public class COSC322Test extends GamePlayer {
+
+	COSC322Timer timer;
 
 	private MonteCarloPlayer ai;
 	private Color aiColor;
@@ -72,6 +73,7 @@ public class COSC322Test extends GamePlayer {
 
 	/** create player that intereacts with the cosc322 game server */
 	public COSC322Test(String userName, String passwd, String room) {
+		this.timer = new COSC322Timer();
 		this.userName = userName;
 		this.passwd = passwd;
 		this.room = room;
@@ -109,91 +111,97 @@ public class COSC322Test extends GamePlayer {
 
 	/** handle all messages received from the game server */
 	@Override
-	@SuppressWarnings("unchecked")
 	public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
-		ArrayList<Integer> board;
-		ArrayList<Integer> queenSource;
-		ArrayList<Integer> queenDestination;
-		ArrayList<Integer> arrowDestination;
-		String whitePlayer;
-		String blackPlayer;
-		switch (messageType) {
-			case GameMessage.GAME_STATE_BOARD:
-				// received board state, feed it the gui and ai
-				board = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
-				if (gamegui != null) {
-					gamegui.setGameState(board);
-				}
-				State state = decodeBoardState(board);
-				System.out.println(state);
-				ai.useState(state);
-				// reset aiColor in-case it was set in a previous game
-				aiColor = null;
-				break;
-			case GameMessage.GAME_ACTION_START:
-				// game has started, check who's turn it is and make a move if it our turn
-				board = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
-				whitePlayer = (String) msgDetails.get(AmazonsGameMessage.PLAYER_WHITE);
-				blackPlayer = (String) msgDetails.get(AmazonsGameMessage.PLAYER_BLACK);
-				if (whitePlayer.equals(blackPlayer)) {
-					throw new IllegalArgumentException("players can't have the same usernames");
-				}
-				if (userName.equals(whitePlayer)) {
-					aiColor = Color.WHITE;
-				}
-				if (userName.equals(blackPlayer)) {
-					aiColor = Color.BLACK;
-				}
-				System.out.println("GAME START whitePlayer=" + whitePlayer + " blackPlayer=" + blackPlayer +  " aiColor=" + aiColor);
-				makeMove();
-				break;
-			case GameMessage.GAME_ACTION_MOVE:
-				// received move, feed it the gui and ai, and make a move ourselves
-				if (gamegui != null) {
-					gamegui.updateGameState(msgDetails);
-				}
-				queenSource = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.QUEEN_POS_CURR);
-				queenDestination = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.QUEEN_POS_NEXT);
-				arrowDestination = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.ARROW_POS);
-				Turn turn = decodeTurn(queenSource, queenDestination, arrowDestination);
-				double winRatio = ai.computeWinRatio(Color.WHITE);
-				ai.doTurn(turn);
-				logState();
-				logWinRatio(winRatio);
-				makeMove();
-				break;
+		logGameMessage(messageType, msgDetails);
+		switch(messageType) {
+		case GameMessage.GAME_STATE_BOARD: handleBoardMessage(msgDetails); break;
+		case GameMessage.GAME_ACTION_START: handleGameStart(msgDetails); break;
+		case GameMessage.GAME_ACTION_MOVE: handleGameMove(msgDetails); break;
 		}
 		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void handleBoardMessage(Map<String, Object> msgDetails) {
+		if (gamegui != null) {
+			gamegui.setGameState((ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE));
+		}
+		State state = COSC322Converter.decodeBoardState(msgDetails);
+		System.out.println(state);
+		ai.useState(state);
+		// reset aiColor in-case it was set in a previous game
+		aiColor = null;
+		timer.stop();
+	}
+
+	private void handleGameStart(Map<String, Object> msgDetails) {
+		Map<Color,String> players = COSC322Converter.decodePlayerUsernames(msgDetails);
+		String whiteUsername = players.get(Color.WHITE);
+		String blackUsername = players.get(Color.BLACK);
+		if (whiteUsername.equals(blackUsername)) {
+			throw new IllegalArgumentException("players can't have the same usernames");
+		}
+		if (userName.equals(whiteUsername)) {
+			aiColor = Color.WHITE;
+		}
+		if (userName.equals(blackUsername)) {
+			aiColor = Color.BLACK;
+		}
+		timer.start(ai.getState().getColorToMove());
+		makeMove();
+	}
+
+	private void handleGameMove(Map<String, Object> msgDetails) {
+		if (gamegui != null) {
+			gamegui.updateGameState(msgDetails);
+		}
+		Turn turn = COSC322Converter.decodeTurn(msgDetails);
+		double winRatio = ai.computeWinRatio(Color.WHITE);
+		timer.stop();
+		ai.doTurn(turn);
+		timer.start(ai.getState().getColorToMove());
+		logState();
+		logWinRatio(winRatio);
+		makeMove();
 	}
 
 	/** makes a move and sends it to the server, if it is our turn */
 	private void makeMove() {
 		if (ai.getState().getColorToMove() != aiColor) {
 			System.out.println("NOT PLAYING MOVE, NOT OUR TURN");
-			return;
+		} else {
+			System.out.println("OUR ai is currently thinking...");
+			Turn turn = ai.suggestTurn();
+			if (turn == null) {
+				System.out.println("OUR ai thinks it has LOST");
+				return;
+			}
+			double winRatio = ai.computeWinRatio(Color.WHITE);
+			ai.doTurn(turn);
+			logState();
+			logWinRatio(winRatio);
+			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn);
+			logGameMessage("meta.sent-action.move", msgDetails);
+			gameClient.sendMoveMessage(msgDetails);
+			timer.stop();
+			if (gamegui != null) {
+				gamegui.updateGameState(msgDetails);
+			}
+			timer.start(ai.getState().getColorToMove());
 		}
-		Turn turn = ai.suggestTurn();
-		if (turn == null) {
-			System.out.println("OUR ai thinks it has LOST");
-			return;
+	}
+
+	private void logGameMessage(String messageType, Map<String, Object> msgDetails) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("messageType=");
+		builder.append(messageType);
+		for (String key: msgDetails.keySet()) {
+			builder.append(" ");
+			builder.append(key);
+			builder.append("=");
+			builder.append(msgDetails.get(key).toString());
 		}
-		double winRatio = ai.computeWinRatio(Color.WHITE);
-		ai.doTurn(turn);
-		logState();
-		logWinRatio(winRatio);
-		ArrayList<Integer> queenSource = new ArrayList<>();
-		queenSource.add(10 - turn.queenSource.y);
-		queenSource.add(turn.queenSource.x + 1);
-		ArrayList<Integer> queenDestination = new ArrayList<>();
-		queenDestination.add(10 - turn.queenDestination.y);
-		queenDestination.add(turn.queenDestination.x + 1);
-		ArrayList<Integer> arrowDestination = new ArrayList<>();
-		arrowDestination.add(10 - turn.arrowDestination.y);
-		arrowDestination.add(turn.arrowDestination.x + 1);
-		gameClient.sendMoveMessage(queenSource, queenDestination, arrowDestination);
-		if (gamegui != null) {
-			gamegui.updateGameState(queenSource, queenDestination, arrowDestination);
-		}
+		System.out.println(builder);
 	}
 
 	/** logging to provide game history to the terminal */
@@ -220,40 +228,6 @@ public class COSC322Test extends GamePlayer {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
 	}
-
-	/** decodes the servers board state format and converts it to our format */
-	private State decodeBoardState(ArrayList<Integer> board) {
-		// the game messages use 1-based indexing 11x11 board
-		// instead of 0-based 10x10 board for reason
-		if (board.size() != 121) {
-			throw new IllegalArgumentException("board size is not 10x10");
-		}
-		ArrayList<Position> whiteQueens = new ArrayList<>();
-		ArrayList<Position> blackQueens = new ArrayList<>();
-		ArrayList<Position> arrows = new ArrayList<>();
-		for (int x = 1; x <= 10; x++) {
-			for (int y = 1; y <= 10; y++) {
-				int piece = board.get(x+(11-y)*11);
-				if (piece == 1) {
-					blackQueens.add(new Position(x - 1, y - 1));
-				} else if (piece == 2) {
-					whiteQueens.add(new Position(x - 1, y - 1));
-				} else if (piece == 3) {
-					arrows.add(new Position(x - 1, y - 1));
-				}
-			}
-		}
-		return new State(10, 10, whiteQueens, blackQueens, arrows);
-	}
-
-	/** decodes the server's turn format and converts it to our format */
-	private Turn decodeTurn(ArrayList<Integer> queenSource, ArrayList<Integer> queenDestination, ArrayList<Integer> arrowDestination) {
-		return new Turn(
-			new Position(queenSource.get(1) - 1, 10 - queenSource.get(0)),
-			new Position(queenDestination.get(1) - 1, 10 - queenDestination.get(0)),
-			new Position(arrowDestination.get(1) - 1, 10 - arrowDestination.get(0))
-		);
-	}
 	
 	@Override
 	public String userName() {
@@ -275,5 +249,4 @@ public class COSC322Test extends GamePlayer {
 		gameClient = new GameClient(userName, passwd, this);			
 	}
 
- 
-}//end of class
+}
