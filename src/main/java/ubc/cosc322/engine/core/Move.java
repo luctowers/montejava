@@ -21,7 +21,18 @@ public class Move {
 	}
 
 	public boolean equals(Move other) {
-        return source == other.source && destination == other.destination && type == other.type;
+        return source.equals(other.source) && destination.equals(other.destination) && type == other.type;
+    }
+
+	@Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Move)) {
+            return false;
+        }
+        return equals((Move) other);
     }
 
 }

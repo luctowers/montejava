@@ -13,14 +13,14 @@ import ubc.cosc322.engine.generators.MoveGenerator;
 /** A player that uses a multi-threaded Monte Carlo Tree Search. */
 public class MonteCarloPlayer extends Player implements AutoCloseable {
 
-	volatile boolean running;
-	Supplier<Player> rolloutPlayerSupplier;
-	MoveGenerator moveGenerator;
-	int millisecondsPerMove;
-	double explorationFactor;
-	Thread[] workerThreads;
-	volatile Node root;
-	int threadCount;
+	private volatile boolean running;
+	private Supplier<Player> rolloutPlayerSupplier;
+	private MoveGenerator moveGenerator;
+	private int millisecondsPerMove;
+	private double explorationFactor;
+	private Thread[] workerThreads;
+	private volatile Node root;
+	private int threadCount;
 
 	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int millisecondsPerMove, double explorationFactor) {
 		this.running = false;
@@ -67,6 +67,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		if (!childFound) {
 			this.root = new Node(state);
 		}
+	}
+
+	public Stats getStats() {
+		Stats stats = new Stats();
+		stats.whiteWinRatio = computeWinRatio(Color.WHITE);
+		stats.simulations = root.simulations;
+		return stats;
 	}
 
 	@Override
@@ -235,7 +242,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		return Math.min(Math.max(0.0, ratio), 1.0);
 	}
 
-	public double computeWinRatio(Color color) {
+	private double computeWinRatio(Color color) {
 		return computeWinRatio(root, color);
 	}
 
@@ -250,6 +257,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			moves = moveGenerator.generateMoves(state);
 			children = new Node[moves.size()];
 		}
+
+	}
+
+	public class Stats {
+
+		public double whiteWinRatio;
+		public int simulations;
 
 	}
 

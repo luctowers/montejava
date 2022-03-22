@@ -1,7 +1,9 @@
 
 package ubc.cosc322;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -156,12 +158,13 @@ public class COSC322Test extends GamePlayer {
 			gamegui.updateGameState(msgDetails);
 		}
 		Turn turn = COSC322Converter.decodeTurn(msgDetails);
-		double winRatio = ai.computeWinRatio(Color.WHITE);
+		MonteCarloPlayer.Stats stats = ai.getStats();
 		timer.stop();
+		COSC322Validator.validateAndLog(ai.getState(), turn);
 		ai.doTurn(turn);
 		timer.start(ai.getState().getColorToMove());
 		logState();
-		logWinRatio(winRatio);
+		logStats(stats);
 		makeMove();
 	}
 
@@ -176,10 +179,10 @@ public class COSC322Test extends GamePlayer {
 				System.out.println("OUR ai thinks it has LOST");
 				return;
 			}
-			double winRatio = ai.computeWinRatio(Color.WHITE);
+			MonteCarloPlayer.Stats stats = ai.getStats();
 			ai.doTurn(turn);
 			logState();
-			logWinRatio(winRatio);
+			logStats(stats);
 			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
@@ -218,8 +221,8 @@ public class COSC322Test extends GamePlayer {
 	}
 
 	/** logging who the ai thinks is winning */
-	private void logWinRatio(double winRatio) {
-		double winPercentage = Math.round(1000.0 * winRatio) / 10.0;
+	private void logStats(MonteCarloPlayer.Stats stats) {
+		double winPercentage = Math.round(1000.0 * stats.whiteWinRatio) / 10.0;
 		if (aiColor == Color.WHITE) {
 			System.out.println("OUR ai thinks WE have a " + winPercentage + "% chance of WINNING");
 		} else if (aiColor == Color.BLACK) {
@@ -227,6 +230,7 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
+		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.simulations) + " simulations performed");
 	}
 	
 	@Override
