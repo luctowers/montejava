@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.Move;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.players.Player;
