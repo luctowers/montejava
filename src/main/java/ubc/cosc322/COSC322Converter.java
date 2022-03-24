@@ -31,7 +31,7 @@ public class COSC322Converter {
 				if (piece == 1) {
 					state.placeQueen(Color.BLACK, position);
 				} else if (piece == 2) {
-					state.placeQueen(Color.BLACK, position);
+					state.placeQueen(Color.WHITE, position);
 				} else if (piece == 3) {
 					state.placeArrow(position);
 				}
@@ -67,8 +67,8 @@ public class COSC322Converter {
 
 	public static ArrayList<Integer> encodePosition(int position, Dimensions dimensions) {
 		ArrayList<Integer> result = new ArrayList<>(2);
-		result.add(dimensions.y(position)-1);
-		result.add(dimensions.x(position)-1);
+		result.add(dimensions.y(position)+1);
+		result.add(dimensions.x(position)+1);
 		return result;
 	}
 
