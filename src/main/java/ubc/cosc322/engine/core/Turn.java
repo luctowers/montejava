@@ -6,9 +6,9 @@ public class Turn {
 	/** The positions involved in a turn.
 	 * Each positional must be orthogonal or diagonal to the preceding position.
 	 */
-	public final Position queenSource, queenDestination, arrowDestination;
+	public final int queenSource, queenDestination, arrowDestination;
 
-	public Turn(Position queenSource, Position queenDestination, Position arrowDestination) {
+	public Turn(int queenSource, int queenDestination, int arrowDestination) {
 		this.queenSource = queenSource;
 		this.queenDestination = queenDestination;
 		this.arrowDestination = arrowDestination;
@@ -21,7 +21,7 @@ public class Turn {
 		if (arrowMove.type != MoveType.ARROW) {
 			throw new IllegalArgumentException("the second move in a turn must be a arrow move");
 		}
-		if (!queenMove.destination.equals(arrowMove.source)) {
+		if (queenMove.destination != arrowMove.source) {
 			throw new IllegalArgumentException("arrow move source must be equal to queen destination");
 		}
 		this.queenSource = queenMove.source;

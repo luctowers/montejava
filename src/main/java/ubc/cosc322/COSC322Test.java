@@ -157,7 +157,7 @@ public class COSC322Test extends GamePlayer {
 		if (gamegui != null) {
 			gamegui.updateGameState(msgDetails);
 		}
-		Turn turn = COSC322Converter.decodeTurn(msgDetails);
+		Turn turn = COSC322Converter.decodeTurn(msgDetails, ai.getState().dimensions);
 		MonteCarloPlayer.Stats stats = ai.getStats();
 		timer.stop();
 		COSC322Validator.validateAndLog(ai.getState(), turn);
@@ -183,7 +183,7 @@ public class COSC322Test extends GamePlayer {
 			ai.doTurn(turn);
 			logState();
 			logStats(stats);
-			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn);
+			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getState().dimensions);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
 			timer.stop();

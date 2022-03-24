@@ -1,7 +1,6 @@
 package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.Position;
 import ubc.cosc322.engine.core.State;
 
 /** A fast heuristic based of the mobility of a color's queens. */
@@ -15,8 +14,9 @@ public class MobilityHeuristic implements Heuristic {
 		for (Color color : Color.values()) {
 			// count the positions that can be reached by queens of that color
 			int mobility = 0;
-			for (Position source : state.getQueens(color)) {
-				mobility += state.traceAll(source).size();
+			for (int source : state.getQueens(color)) {
+				// TODO: FIX THIS
+				// mobility += state.traceAll(source).size();
 			}
 			// white mobility makes heuristic positive, black makes it negative
 			if (color == Color.WHITE) {

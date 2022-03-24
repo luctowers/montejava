@@ -1,9 +1,5 @@
 package ubc.cosc322.engine.core;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /** The 8 directions pieces can move in the Game of Amazons. */
 public enum Direction {
 
@@ -13,8 +9,8 @@ public enum Direction {
 	/** Coordinate offsets. One of (-1, 0, 1). */
 	public final int x, y;
 
-	/** A list of all directions, without generating a new array aeach time. */
-	public static final List<Direction> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
+	/** The number of directions */
+	public static final int count = 8;
 
 	private Direction(int x, int y) {
 		this.x = x;

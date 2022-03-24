@@ -12,16 +12,16 @@ public class Move {
 	 * For ARROW moves, source is the queen shooting the arrow and destination
 	 * is the arrow's location.
 	 */
-	public final Position source, destination;
+	public final int source, destination;
 
-	public Move(MoveType type, Position source, Position destination) {
+	public Move(MoveType type, int source, int destination) {
 		this.type = type;
 		this.source = source;
 		this.destination = destination;
 	}
 
 	public boolean equals(Move other) {
-        return source.equals(other.source) && destination.equals(other.destination) && type == other.type;
+        return source == other.source && destination == other.destination && type == other.type;
     }
 
 	@Override
