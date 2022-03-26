@@ -1,21 +1,33 @@
 package ubc.cosc322.engine.core;
 
-/** The three pieces in the Game of Amazons. */
-public enum Piece {
+public class Piece {
 
-	WHITE_QUEEN, BLACK_QUEEN, ARROW;
+	private Piece() {};
 
-	/** Returns the queen of the corresponding color.
-	 * @param color One of WHITE or BLACK
-	 * @return One of WHITE_QUEEN or BLACK_QUEEN
-	 */
-	public static Piece queenOfColor(Color color) {
-		if (color == Color.WHITE) {
-			return WHITE_QUEEN;
-		} else if (color == Color.BLACK) {
-			return BLACK_QUEEN;
-		} else {
-			return null;
+	public static final byte NONE = 0;
+	public static final byte WHITE_QUEEN = 1;
+	public static final byte BLACK_QUEEN = 2;
+	public static final byte ARROW = 3;
+
+	public static byte queenOfColor(Color color) {
+		switch (color) {
+			case WHITE:
+				return WHITE_QUEEN;
+			case BLACK:
+				return BLACK_QUEEN;
+			default:
+				return NONE;
+		}
+	}
+
+	public static Color colorOfQueen(byte queen) {
+		switch (queen) {
+			case WHITE_QUEEN:
+				return Color.WHITE;
+			case BLACK_QUEEN:
+				return Color.BLACK;
+			default:
+				return null;
 		}
 	}
 

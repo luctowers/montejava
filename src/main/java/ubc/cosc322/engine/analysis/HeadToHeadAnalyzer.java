@@ -16,7 +16,7 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 	State initialState;
 	Player whitePlayer, blackPlayer;
 	private Map<Color,Integer> winCounts;
-	private List<Consumer<State>> moveCallbacks;
+	private List<Consumer<State>> turnCallbacks;
 	private List<Consumer<State>> endCallbacks;
 	
 	public HeadToHeadAnalyzer(State initialState, Player whitePlayer, Player blackPlayer) {
@@ -29,7 +29,7 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 		this.winCounts = new EnumMap<>(Color.class);
 		winCounts.put(Color.WHITE, Integer.valueOf(0));
 		winCounts.put(Color.BLACK, Integer.valueOf(0));
-		this.moveCallbacks = new ArrayList<>();
+		this.turnCallbacks = new ArrayList<>();
 		this.endCallbacks = new ArrayList<>();
 	}
 
@@ -39,7 +39,7 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 			whitePlayer.useState(initialState.clone());
 			blackPlayer.useState(initialState.clone());
 			while (true) {
-				for (Consumer<State> callback : moveCallbacks) {
+				for (Consumer<State> callback : turnCallbacks) {
 					callback.accept(playState);
 				}
 				Player playerToMove, playerToWait;
@@ -50,11 +50,10 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 					playerToMove = blackPlayer;
 					playerToWait = whitePlayer;
 				}
-				Turn turn = playerToMove.suggestTurn();
+				Turn turn = playerToMove.suggestAndDoTurn();
 				if (turn == null) {
 					break;
 				}
-				playerToMove.doTurn(turn);
 				playerToWait.doTurn(turn);
 				playState.doTurn(turn);
 			}
@@ -83,8 +82,8 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 		return winCounts.get(Color.WHITE).intValue() + winCounts.get(Color.BLACK).intValue();
 	}
 
-	public void onMove(Consumer<State> callback) {
-		moveCallbacks.add(callback);
+	public void onTurn(Consumer<State> callback) {
+		turnCallbacks.add(callback);
 	}
 
 	public void onEnd(Consumer<State> callback) {

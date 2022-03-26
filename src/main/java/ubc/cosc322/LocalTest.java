@@ -4,24 +4,23 @@ import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
-import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.Player;
-import ubc.cosc322.engine.players.UniformRandomPlayer;
+import ubc.cosc322.engine.players.RandomMovePlayer;
 
 public class LocalTest {
 	
 	public static void main(String[] args) {
 
-		final int ITERATION_COUNT = 1;
+		final int ITERATION_COUNT = 1000000;
 
 		State initialState = new State(); // standard 10x10 4 queen board
 
-		Player white = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new UniformRandomPlayer(new LegalMoveGenerator()), 1, 1000, 0.3);
-		Player black = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new UniformRandomPlayer(new LegalMoveGenerator()), 7, 1000, 0.3);
+		Player white = new RandomMovePlayer(new LegalMoveGenerator());
+		Player black = new RandomMovePlayer(new LegalMoveGenerator());
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
 
-			analyzer.onMove(state -> System.out.println(state));
+			// analyzer.onEnd(state -> System.out.println(state));
 			System.out.println("iteration count: " + ITERATION_COUNT);
 
 			long startTime = System.currentTimeMillis();

@@ -9,13 +9,13 @@ public enum Color {
 	 * @return The opposite color.
 	 */
 	public Color other() {
-		if (this == WHITE) {
-			return BLACK;
-		} else if (this == BLACK) {
-			return WHITE;
-		} else {
-			return null;
+		switch (this) {
+			case WHITE:
+				return BLACK;
+			case BLACK:
+				return WHITE;
 		}
+		return null;
 	}
 
 }

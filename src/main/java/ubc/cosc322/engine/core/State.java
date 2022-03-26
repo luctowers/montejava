@@ -1,51 +1,40 @@
 package ubc.cosc322.engine.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import ubc.cosc322.engine.util.ConsoleColors;
+import ubc.cosc322.engine.util.IntList;
 
 /** A complete mutable board state of the game of amazons. */
 public class State {
 
+	public static final int MAX_QUEENS_PER_COLOR = 4;
+
 	public final Dimensions dimensions;
 
-	/** A single dimensional array of size width*weight for piece lookups. */
-	private Piece[] board;
+	private byte[] board;
 
-	/** The next color that should make a move. */
 	private Color colorToMove;
 
-	/** The next move type that is expected. */
 	private MoveType nextMoveType;
 
-	/** A stack of previously performed moves. Used primarily to undo moves. */
-	private Stack<Move> moves;
+	private EnumMap<Color,IntList> freeQueens;
 
-	/** A list of queen positions for each color. This is a helper structs that
-	 * allows easy location of queens without the need to iterate through the 
-	 * entire board. This is efficient because there aren't that many queens.
-	 */
-	private Map<Color,ArrayList<Integer>> queenPositions;
+	private int lastQueenPick, lastQueenMove, lastArrowShot;
 
-	/** Creates a custom Amazons board of any size with any number of queens. */
 	public State(Dimensions dimensions) {
 		this.dimensions = dimensions;
-		this.board = new Piece[dimensions.arrayWidth*dimensions.arrayHeight];
+		this.board = new byte[dimensions.arrayWidth*dimensions.arrayHeight];
 		this.colorToMove = Color.WHITE;
-		this.nextMoveType = MoveType.QUEEN;
-		this.moves = new Stack<>();
-		this.queenPositions = new EnumMap<>(Color.class);
-		this.queenPositions.put(Color.WHITE, new ArrayList<>(4));
-		this.queenPositions.put(Color.BLACK, new ArrayList<>(4));
+		this.nextMoveType = MoveType.PICK_QUEEN;
+		this.freeQueens = new EnumMap<>(Color.class);
+		this.freeQueens.put(Color.WHITE, new IntList(MAX_QUEENS_PER_COLOR));
+		this.freeQueens.put(Color.BLACK, new IntList(MAX_QUEENS_PER_COLOR));
+		this.lastQueenPick = -1;
+		this.lastQueenMove = -1;
+		this.lastArrowShot = -1;
 	}
 
-	/** Creates a standard 10x10 amazons board with 4 queens per color. */
 	public State() {
 		this(new Dimensions(10, 10));
 		placeQueen(Color.WHITE, dimensions.position(0, 3));
@@ -58,219 +47,227 @@ public class State {
 		placeQueen(Color.BLACK, dimensions.position(9, 6));
 	}
 
-	@SuppressWarnings("unchecked")
 	private State(State other) {
 		this.dimensions = other.dimensions;
 		this.board = other.board.clone();
 		this.colorToMove = other.colorToMove;
 		this.nextMoveType = other.nextMoveType;
-		this.moves = (Stack<Move>) other.moves.clone();
-		this.queenPositions = new EnumMap<>(Color.class);
-		this.queenPositions.put(Color.WHITE, new ArrayList<>(other.queenPositions.get(Color.WHITE)));
-		this.queenPositions.put(Color.BLACK, new ArrayList<>(other.queenPositions.get(Color.BLACK)));
+		this.lastQueenPick = other.lastQueenPick;
+		this.lastQueenMove = other.lastQueenMove;
+		this.lastArrowShot = other.lastArrowShot;
+		this.freeQueens = new EnumMap<>(Color.class);
+		this.freeQueens.put(Color.WHITE, other.freeQueens.get(Color.WHITE).clone());
+		this.freeQueens.put(Color.BLACK, other.freeQueens.get(Color.BLACK).clone());
 	}
 
 	public void placeQueen(Color color, int position) {
 		placePiece(Piece.queenOfColor(color), position);
-		queenPositions.get(color).add(position);
+		freeQueens.get(color).push(position);
 	}
 
 	public void placeArrow(int position) {
 		placePiece(Piece.ARROW, position);
 	}
 
-	private void placePiece(Piece piece, int position) {
+	private void placePiece(byte piece, int position) {
 		if (dimensions.outOfBounds(position)) {
 			throw new IllegalArgumentException("invalid board position");
 		}
-		if (board[position] != null) {
+		if (board[position] != Piece.NONE) {
 			throw new IllegalArgumentException("position is not empty");
 		}
 		board[position] = piece;
 	}
 
-	/** Updates the game state by performing a move. */
-	public void doMove(Move move) {
-		switch (move.type) {
-			case QUEEN:
-				updateQueenPosition(colorToMove, move.source, move.destination);
-				nextMoveType = MoveType.ARROW;
+	public void doMove(int move) {
+		doMove(nextMoveType, move);
+	}
+
+	public void doMove(MoveType type, int move) {
+		switch (type) {
+			case PICK_QUEEN:
+				lastQueenPick = move;
 				break;
-			case ARROW:
-				board[move.destination] = Piece.ARROW;
-				nextMoveType = MoveType.QUEEN;
+			case MOVE_QUEEN:
+				updateQueenPosition(lastQueenPick, move);
+				lastQueenMove = move;
+				break;
+			case SHOOT_ARROW:
+				board[move] = Piece.ARROW;
+				lastArrowShot = move;
 				colorToMove = colorToMove.other();
 				break;
 			default:
 				throw new IllegalArgumentException("Illegal move type");
 		}
-		moves.add(move);
+		nextMoveType = type.next();
 	}
 
-	/** Updates the game state by performing a turn (2 moves by one player). */
 	public void doTurn(Turn turn) {
-		doMove(turn.queenMove());
-		doMove(turn.arrowMove());
+		doMove(MoveType.PICK_QUEEN, turn.queenPick);
+		doMove(MoveType.MOVE_QUEEN, turn.queenMove);
+		doMove(MoveType.SHOOT_ARROW, turn.arrowShot);
 	}
 
-	/** Updates the game state by undoing the last move performed. */
-	public void undoMove() {
-		Move move = moves.pop();
-		switch (move.type) {
-			case QUEEN:
-				updateQueenPosition(colorToMove, move.destination, move.source);
-				nextMoveType = MoveType.QUEEN;
-				break;
-			case ARROW:
-				board[move.destination] = null;
-				nextMoveType = MoveType.ARROW;
-				colorToMove = colorToMove.other();
-				break;
+	public void undoMove(int move) {
+		undoMove(nextMoveType.previous(), move);
+	}
+
+	public void undoMove(MoveType type, int move) {
+		switch (type) {
+			case MOVE_QUEEN:
+				undoQueenMove(move);
+			case SHOOT_ARROW:
+				undoArrowShot(move);
 			default:
-				throw new IllegalArgumentException("Illegal move type");
+				throw new IllegalArgumentException("only queen and arrow moves can be undone");
 		}
 	}
 
-	/** Updates the game state by undoing the last two moves performed. */
-	public void undoTurn(Turn turn) {
-		undoMove();
-		undoMove();
+	public void undoQueenMove(int move) {
+		updateQueenPosition(move, lastQueenPick);
+		nextMoveType = MoveType.MOVE_QUEEN.previous();
 	}
 
-	/** Helper method to update a queen's position in both the board and helper structs. */
-	private void updateQueenPosition(Color color, int oldPosition, int newPosition) {
-		ArrayList<Integer> positions = queenPositions.get(color);
+	public void undoArrowShot(int move) {
+		board[move] = Piece.NONE;
+		nextMoveType = MoveType.SHOOT_ARROW.previous();
+	}
+
+	private void updateQueenPosition(int oldPosition, int newPosition) {
+		byte queen = board[oldPosition];
+		Color color = Piece.colorOfQueen(queen);
+		if (color == null) {
+			return;
+		}
+		IntList positions = freeQueens.get(color);
 		for (int i = 0; i < positions.size(); i++) {
-			if (positions.get(i).intValue() == oldPosition) {
+			if (positions.get(i) == oldPosition) {
 				positions.set(i, newPosition);
 				break;
 			}
 		}
-		board[oldPosition] = null;
-		board[newPosition] = Piece.queenOfColor(color);
+		colorToMove = color;
+		board[oldPosition] = Piece.NONE;
+		board[newPosition] = queen;
 	}
 
-	/** Get's an immutable list of teh positions of all queens of a given color. */
-	public List<Integer> getQueens(Color color) {
-		return Collections.unmodifiableList(queenPositions.get(color));
+	public IntList getFreeQueens(Color color) {
+		// TODO: make this return immutable
+		return freeQueens.get(color);
 	}
 
-	/** Returns the next color that is expected to make a move. */
 	public Color getColorToMove() {
 		return colorToMove;
 	}
 
-	/** Returns the next move type that is expected. */
 	public MoveType getNextMoveType() {
 		return nextMoveType;
 	}
 
-	/** Gets the location of the last queen to move. Used to determine where arrows are shot from. */
-	public int getLastMovedQueen() {
-		Move move = moves.peek();
-		if (move.type == MoveType.QUEEN) {
-			return move.destination;
-		} else {
-			throw new IllegalStateException("no queen has been moved yet");
-		}
+	public int getLastQueenPick() {
+		return lastQueenPick;
+	}
+
+	public int getLastQueenMove() {
+		return lastQueenMove;
+	}
+
+	public int getLastArrowShot() {
+		return lastArrowShot;
 	}
 
 	/** Gets and the positions that can be reached orthogonally or diagonally from a position. */
-	public int[] traceAll(int source) {
-		int[] destinations = new int[dimensions.maxTrace];
-		int i = 0;
+	public void traceAll(int source, IntList output) {
 		for (int d = 0; d < Direction.count; d++) {
 			int offset = dimensions.getDirectionOffset(d);
 			int position = source + offset;
-			while (!dimensions.outOfBounds(position) && board[position] == null) {
-				destinations[i++] = position;
+			while (!dimensions.outOfBounds(position) && board[position] == Piece.NONE) {
+				output.push(position);
 				position += offset;
 			}
 		}
-		for (; i < dimensions.maxTrace; i++) {
-			destinations[i] = -1;
-		}
-		return destinations;
 	}
 
-	public ArrayList<Move> generateMoves() {
+	public void generateMoves(IntList output) {
 		switch (nextMoveType) {
-			case QUEEN:
-				return generateQueenMoves();
-			case ARROW:
-				return generateArrowMoves();
+			case PICK_QUEEN:
+				generateQueenPicks(output);
+				break;
+			case MOVE_QUEEN:
+				generateQueenMoves(output);
+				break;
+			case SHOOT_ARROW:
+				generateArrowShots(output);
+				break;
 			default:
 				throw new IllegalStateException("Illegal move type");
 		}
 	}
 
-	private ArrayList<Move> generateQueenMoves() {
-		ArrayList<Integer> queens = queenPositions.get(colorToMove);
-		ArrayList<Move> moves = new ArrayList<>(queens.size()*dimensions.maxTrace);
-		for (int source : queens) {
-			for (int destination : traceAll(source)) {
-				if (destination == -1) {
-					break;
+	private void generateQueenPicks(IntList output) {
+		IntList freeQueensToMove = freeQueens.get(colorToMove);
+		for (int q = freeQueensToMove.size() - 1; q >= 0; q--) {
+			int queen = freeQueensToMove.get(q);
+			boolean surroundedByArrows = true;
+			boolean trapped = true;
+			for (int d = 0; d < Direction.count; d++) {
+				int offset = dimensions.getDirectionOffset(d);
+				int adjacent = queen + offset;
+				if (!dimensions.outOfBounds(adjacent)) {
+					byte piece = board[adjacent];
+					if (piece != Piece.ARROW) {
+						surroundedByArrows = false;
+					}
+					if (piece == Piece.NONE) {
+						trapped = false;
+						break;
+					}
 				}
-				moves.add(new Move(
-					MoveType.QUEEN,
-					source,
-					destination
-				));
+			}
+			if (surroundedByArrows) {
+				freeQueensToMove.remove(q);
+			}
+			if (!trapped) {
+				output.push(queen);
 			}
 		}
-		return moves;
 	}
 
-	private ArrayList<Move> generateArrowMoves() {
-		ArrayList<Move> moves = new ArrayList<>(dimensions.maxTrace);
-		int source = getLastMovedQueen();
-		for (int destination : traceAll(source)) {
-			if (destination == -1) {
-				break;
-			}
-			moves.add(new Move(
-				MoveType.ARROW,
-				source,
-				destination
-			));
-		}
-		return moves;
+	private void generateQueenMoves(IntList output) {
+		traceAll(lastQueenPick, output);
 	}
 
-	/** Gets the piece type at a given board index. */
-	public Piece getPiece(int position) {
+	private void generateArrowShots(IntList output) {
+		traceAll(lastQueenMove, output);
+	}
+
+	public byte getPiece(int position) {
 		return board[position];
 	}
 
 	@Override
-	/** Copies the current state to a new object. */
 	public State clone()
     {
 		return new State(this);
     }
 
 	@Override
-	/** Creates a fancy colored console representation of the current board state. */
 	public String toString() { 
 		StringBuilder builder = new StringBuilder();
 		String line = horiztonalLine();
 		int highlightedBlank = -1;
 		int highlightedQueen = -1;
 		int highlightedArrow = -1;
-		if (moves.size() >= 1) {
-			Move move = moves.peek();
-			if (move.type == MoveType.QUEEN) {
-				highlightedBlank = move.source;
-				highlightedQueen = move.destination;
-			} else if (move.type == MoveType.ARROW) {
-				if (moves.size() >= 2) {
-					Move previousMove = moves.get(moves.size()-2);
-					highlightedBlank = previousMove.source;
-				}
-				highlightedQueen = move.source;
-				highlightedArrow = move.destination;
-			}
+		switch (nextMoveType) {
+			case MOVE_QUEEN:
+				highlightedQueen = lastQueenPick;
+				break;
+			case PICK_QUEEN:
+				highlightedArrow = lastArrowShot;
+			case SHOOT_ARROW:
+				highlightedQueen = lastQueenMove;
+				highlightedBlank = lastQueenPick;
 		}
 		builder.append(ConsoleColors.GREEN);
 		builder.append(line);
@@ -279,8 +276,8 @@ public class State {
 			builder.append("| ");
 			for (int x = 0; x < dimensions.boardWidth; x++) {
 				int position = dimensions.position(x, y);
-				Piece piece = board[position];
-				if (piece == null) {
+				byte piece = board[position];
+				if (piece == Piece.NONE) {
 					if (position == highlightedBlank) {
 						builder.append(ConsoleColors.YELLOW);
 						builder.append('!');
