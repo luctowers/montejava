@@ -1,6 +1,7 @@
 package ubc.cosc322.engine.players;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Supplier;
@@ -81,11 +82,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		}
 		RootStats newStats = new RootStats();
 		newStats.maxDepth = rootStats.maxDepth - 1;
-		rootStats.evaluations = root.childrenEvaluations[index];
+		newStats.evaluations = root.childrenEvaluations[index];
 		if (root.color != child.color) {
-			rootStats.rewards = root.childrenEvaluations[index] - root.childrenRewards[index];
+			newStats.rewards = root.childrenEvaluations[index] - root.childrenRewards[index];
 		} else {
-			rootStats.rewards = root.childrenRewards[index];
+			newStats.rewards = root.childrenRewards[index];
 		}
 		rootStats = newStats;
 		root = child;
@@ -103,6 +104,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		Stats stats = new Stats(rootStats);
 		Node node = root;
 		while (maxMoves-- > 0) {
+			System.out.println(Arrays.toString(node.childrenEvaluations));
 			double maxReward = 0.0;
 			int maxIndex = -1;
 			for (int i = 0; node != null && i < node.size(); i++) {
