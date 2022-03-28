@@ -56,6 +56,15 @@ public final class IntList {
 		size--;
 	}
 
+	public int search(int n) {
+		for (int i = 0; i < size; i++) {
+			if (array[i] == n) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	public void clear() {
 		size = 0;
 	}
@@ -63,5 +72,20 @@ public final class IntList {
 	public IntList clone() {
 		return new IntList(array.clone(), size);
 	}
+
+	@Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+		builder.append('[');
+		if (size >= 1) {
+			builder.append(array[0]);
+		}
+		for (int i = 1; i < size; i++) {
+			builder.append(',');
+			builder.append(array[i]);
+		}
+		builder.append(']');
+		return builder.toString();
+    }
 
 }

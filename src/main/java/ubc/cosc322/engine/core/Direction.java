@@ -10,7 +10,7 @@ public enum Direction {
 	public final int x, y;
 
 	/** The number of directions */
-	public static final int count = 8;
+	public static final int COUNT = 8;
 
 	private Direction(int x, int y) {
 		this.x = x;

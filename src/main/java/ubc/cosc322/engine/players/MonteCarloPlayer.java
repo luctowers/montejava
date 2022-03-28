@@ -1,290 +1,332 @@
-// package ubc.cosc322.engine.players;
+package ubc.cosc322.engine.players;
 
-// import java.util.ArrayList;
-// import java.util.List;
-// import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.function.Supplier;
 
-// import ubc.cosc322.engine.core.Color;
-// import ubc.cosc322.engine.core.Move;
-// import ubc.cosc322.engine.core.State;
-// import ubc.cosc322.engine.core.Turn;
-// import ubc.cosc322.engine.generators.MoveGenerator;
+import ubc.cosc322.engine.core.Color;
+import ubc.cosc322.engine.core.MoveType;
+import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Turn;
+import ubc.cosc322.engine.generators.MoveGenerator;
+import ubc.cosc322.engine.util.IntList;
 
-// /** A player that uses a multi-threaded Monte Carlo Tree Search. */
-// public class MonteCarloPlayer extends Player implements AutoCloseable {
+/** A player that uses a multi-threaded Monte Carlo Tree Search. */
+public class MonteCarloPlayer extends Player implements AutoCloseable {
 
-// 	private volatile boolean running;
-// 	private Supplier<Player> rolloutPlayerSupplier;
-// 	private MoveGenerator moveGenerator;
-// 	private int millisecondsPerMove;
-// 	private double explorationFactor;
-// 	private Thread[] workerThreads;
-// 	private volatile Node root;
-// 	private int threadCount;
-// 	private int maxDepth;
+	private volatile boolean running;
+	private Supplier<Player> rolloutPlayerSupplier;
+	private MoveGenerator moveGenerator;
+	private int thinkingMillis;
+	private double explorationFactor;
+	private Thread[] workerThreads;
+	private volatile Node root;
+	private int threadCount;
+	private volatile RootStats rootStats;
+	private Stats publicStats;
 
-// 	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int millisecondsPerMove, double explorationFactor) {
-// 		this.running = false;
-// 		this.moveGenerator = moveGenerator;
-// 		this.millisecondsPerMove = millisecondsPerMove;
-// 		this.explorationFactor = explorationFactor;
-// 		this.threadCount = threadCount;
-// 		this.rolloutPlayerSupplier = rolloutPlayerSupplier;
-// 	}
+	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int thinkingMillis, double explorationFactor) {
+		this.running = false;
+		this.moveGenerator = moveGenerator;
+		this.thinkingMillis = thinkingMillis;
+		this.explorationFactor = explorationFactor;
+		this.threadCount = threadCount;
+		this.rolloutPlayerSupplier = rolloutPlayerSupplier;
+	}
 
-// 	@Override
-// 	public void useState(State state) {
-// 		try {
-// 			close();
-// 		} catch (Exception e) {
-// 			e.printStackTrace();
-// 		}
-// 		super.useState(state);
-// 		this.root = new Node(state);
-// 		this.running = true;
-// 		this.maxDepth = 0;
-// 		this.workerThreads = new Thread[threadCount];
-// 		for (int i = 0; i < threadCount; i++) {
-// 			this.workerThreads[i] = new Thread(new Worker());
-// 			this.workerThreads[i].start();
-// 		}
-// 	}
+	@Override
+	public void useState(State state) {
+		try {
+			close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		super.useState(state);
+		this.root = new Node(state);
+		this.rootStats = new RootStats();
+		this.running = true;
+		this.workerThreads = new Thread[threadCount];
+		for (int i = 0; i < threadCount; i++) {
+			this.workerThreads[i] = new Thread(new Worker());
+			this.workerThreads[i].start();
+		}
+	}
 
-// 	@Override
-// 	public void doMove(Move move) {
-// 		this.maxDepth = 0;
-// 		// rebase the search tree on the move if possible
-// 		boolean childFound = false;
-// 		for (int i = 0; i < root.children.length; i++) {
-// 			if (root.moves.get(i).equals(move)) {
-// 				Node child = root.children[i];
-// 				if  (child != null) {
-// 					root = root.children[i];
-// 					childFound = true;
-// 				}
-// 				break;
-// 			}
-// 		}
-// 		super.doMove(move);
-// 		// didn't find the move to rebase, need to start from scratch
-// 		if (!childFound) {
-// 			this.root = new Node(state);
-// 		}
-// 	}
+	@Override
+	public void doMove(int move) {
+		publicStats = new Stats(rootStats);
+		super.doMove(move);
+		if (!rebase(move)) {
+			this.root = new Node(state);
+			this.rootStats = new RootStats();
+		}
+	}
 
-// 	public Stats getStats() {
-// 		Stats stats = new Stats();
-// 		stats.whiteWinRatio = computeWinRatio(Color.WHITE);
-// 		stats.simulations = root.simulations;
-// 		stats.maxDepth = maxDepth;
-// 		return stats;
-// 	}
+	@Override
+	public void doTurn(Turn turn) {
+		publicStats = new Stats(rootStats);
+		super.doTurn(turn);
+		if (!rebase(turn.queenPick) || !rebase(turn.queenMove) || !rebase(turn.arrowShot)) {
+			this.root = new Node(state);
+			this.rootStats = new RootStats();
+		}
+	}
 
-// 	@Override
-// 	public Move suggestMove() {
-// 		try {
-// 			Thread.sleep(millisecondsPerMove);
-// 		} catch (InterruptedException e) {
-// 			e.printStackTrace();
-// 		}
-// 		List<Move> moves = suggestMultiple(1); 
-// 		if (moves.size() != 1) {
-// 			return null;
-// 		}
-// 		return moves.get(0);
-// 	}
+	private boolean rebase(int move) {
+		int index = root.moves.search(move);
+		Node child = root.children[index];
+		if (child == null) {
+			return false;
+		}
+		RootStats newStats = new RootStats();
+		newStats.maxDepth = rootStats.maxDepth - 1;
+		rootStats.evaluations = root.childrenEvaluations[index];
+		if (root.color != child.color) {
+			rootStats.rewards = root.childrenEvaluations[index] - root.childrenRewards[index];
+		} else {
+			rootStats.rewards = root.childrenRewards[index];
+		}
+		rootStats = newStats;
+		root = child;
+		return true;
+	}
 
-// 	@Override
-// 	public Turn suggestTurn() {
-// 		try {
-// 			Thread.sleep(2*millisecondsPerMove);
-// 		} catch (InterruptedException e) {
-// 			e.printStackTrace();
-// 		}
-// 		List<Move> moves = suggestMultiple(2); 
-// 		if (moves.size() != 2) {
-// 			return null;
-// 		}
-// 		return new Turn(moves.get(0), moves.get(1));
-// 	}
+	@Override
+	public void suggestAndDoMoves(int maxMoves, IntList output) {
+		try {
+			Thread.sleep(thinkingMillis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// TODO: find a better way to handle these stats instead of caching here
+		Stats stats = new Stats(rootStats);
+		Node node = root;
+		while (maxMoves-- > 0) {
+			double maxReward = 0.0;
+			int maxIndex = -1;
+			for (int i = 0; node != null && i < node.size(); i++) {
+				double reward = (double) node.childrenRewards[i] / node.childrenEvaluations[i];
+				if (reward >= maxReward) {
+					maxReward = reward;
+					maxIndex = i;
+				}
+			}
+			if (maxIndex == -1) {
+				break;
+			}
+			int move = node.moves.get(maxIndex);
+			doMove(move);
+			output.push(move);
+			node = node.children[maxIndex];
+		}
+		publicStats = stats;
+	}
 
-// 	private List<Move> suggestMultiple(int n) {
-// 		List<Move> moves = new ArrayList<>();
-// 		Node node = root;
-// 		for (int d = 0; d < n && node != null; d++) {
-// 			double maxWinRatio = 0.0;
-// 			Move selectedMove = null;
-// 			Node selectedChild = null;
-// 			for (int i = 0; i < node.children.length; i++) {
-// 				Node child = node.children[i];
-// 				if (child == null) {
-// 					if (selectedMove == null) {
-// 						selectedMove = node.moves.get(i);
-// 						selectedChild = child;
-// 					}
-// 					break;
-// 				}
-// 				double winRatio = computeWinRatio(child, state.getColorToMove());
-// 				if (winRatio >= maxWinRatio) {
-// 					maxWinRatio = winRatio;
-// 					selectedMove = node.moves.get(i);
-// 					selectedChild = child;
-// 				}
-// 			}
-// 			if (selectedMove != null) {
-// 				moves.add(selectedMove);
-// 			}
-// 			node = selectedChild;
-// 		}
-// 		return moves;
-// 	}
+	public Stats getStats() {
+		return publicStats;
+	}
 
+	private class Worker implements Runnable {
 
-// 	private class Worker implements Runnable {
+		private Player rolloutPlayer;
+		IntList indexTrace;
+		ArrayList<Node> nodeTrace;
+		IntList simulationBuffer;
 
-// 		private Player rolloutPlayer;
+		public Worker() {
+			this.rolloutPlayer = rolloutPlayerSupplier.get();
+			this.indexTrace = new IntList(state.dimensions.boardSize * MoveType.COUNT);
+			this.nodeTrace = new ArrayList<>(state.dimensions.boardSize * MoveType.COUNT);
+			this.simulationBuffer = new IntList(MoveType.COUNT);
+		}
 
-// 		public Worker() {
-// 			this.rolloutPlayer = rolloutPlayerSupplier.get();
-// 		}
+		private void search(State state) {
 
-// 		@Override
-// 		public void run() {
-// 			while (running) {
-// 				if (root != null) {
-// 					try {
-// 						search(root, state.clone(), 1);
-// 					} catch (Exception e) {
-// 						e.printStackTrace();
-// 					}
-// 				}
-// 			}
-// 		}
+			// get a reference to the stats object now
+			// if we got it later, it might have changed
+			// and stats would be added to the wrong object!
+			RootStats cachedRootStats = rootStats;
 
-// 		private int search(Node node, State state, int depth) {
+			// selection
+			nodeTrace.clear();
+			indexTrace.clear();
+			int parentEvaluations = cachedRootStats.evaluations;
+			Node previousNode = null;
+			Node selectedNode = root;
+			int selectedChild = -1;
+			do {
+				selectedChild = select(parentEvaluations, selectedNode);
+				if (selectedChild == -1) {
+					break;
+				}
+				indexTrace.push(selectedChild);
+				nodeTrace.add(selectedNode);
+				state.doMove(selectedNode.moves.get(selectedChild));
+				parentEvaluations = selectedNode.childrenEvaluations[selectedChild];
+				previousNode = selectedNode;
+				selectedNode = selectedNode.children[selectedChild];
+			} while (selectedNode != null);
 
-// 			if (depth > maxDepth) {
-// 				maxDepth = depth;
-// 			}
+			int depth = indexTrace.size();
+			if (depth > cachedRootStats.maxDepth) {
+				cachedRootStats.maxDepth = depth;
+			}
 
-// 			double maxScore = 0.0;
-// 			Move selecteMove = null;
-// 			Node selectedChild = null;
-// 			for (int i = 0; i < node.children.length; i++) {
-// 				if (node.children[i] != null) {
+			Color winner;
+			if (selectedChild == -1) {
 
-// 					double score = ucb1(node, node.children[i], state.getColorToMove());
-// 					if (score > maxScore) {
-// 						maxScore = score;
-// 						selecteMove = node.moves.get(i);
-// 						selectedChild = node.children[i];
-// 					}
+				// terminal state
+				winner = state.getColorToMove().other();
 
-// 				} else {
+			} else {
 
-// 					// perform simulation
-// 					state.doMove(node.moves.get(i));
-// 					Node leaf = new Node(state);
-// 					int simulationResult = simulate(state);
-// 					// record simulation in leaf and attach leaf to parent
-// 					leaf.whiteWins = simulationResult;
-// 					leaf.simulations = 1;
-// 					node.children[i] = leaf;
-// 					// record simulation in parent
-// 					node.simulations += 1;
-// 					node.whiteWins += simulationResult;
-// 					// back propogation
-// 					return leaf.whiteWins;
+				// expansion
+				Node expandedNode = new Node(state);
+				// simulation
+				winner = simulate(state);
+				// attach expanded node
+				previousNode.children[selectedChild] = expandedNode;
 
-// 				}
-// 			}
+			}
 
-// 			if (selectedChild == null || selecteMove == null) {
+			backpropogate(cachedRootStats, winner);
 
-// 				node.simulations += 1;
-// 				if (state.getColorToMove() != Color.WHITE) {
-// 					node.whiteWins += 1;
-// 					return 1;
-// 				} else {
-// 					return 0;
-// 				}
+		}
 
-// 			} else {
+		private int select(int parentEvaluations, Node node) {
+			if (node.needsExpansion()) {
+				return node.nextToExpand++;
+			}
+			double logParentEvaluations = Math.log(parentEvaluations);
+			double maxScore = 0.0;
+			int maxScoreIndex = -1;
+			for (int i = 0; i < node.size(); i++) {
+				if (node.children[i] == null) {
+					return i;
+				}
+				double score = ucb1(node.childrenRewards[i], node.childrenEvaluations[i], logParentEvaluations);
+				if (score >= maxScore) {
+					maxScore = score;
+					maxScoreIndex = i;
+				}
+			}
+			return maxScoreIndex;
+		}
 
-// 				state.doMove(selecteMove);
-// 				int result = search(selectedChild, state, depth+1);
-// 				node.simulations += 1;
-// 				node.whiteWins += result;
-// 				return result;
+		private Color simulate(State state) {
+			rolloutPlayer.useState(state);
+			do {
+				simulationBuffer.clear();
+				rolloutPlayer.suggestAndDoMoves(MoveType.COUNT, simulationBuffer);
+			} while (simulationBuffer.size() != 0);
+			return state.getColorToMove().other();
+		}
 
-// 			}
+		private void backpropogate(RootStats cachedRootStats, Color winner) {
+			cachedRootStats.evaluations += 1;
+			if (state.getColorToMove() == winner) {
+				cachedRootStats.rewards += 1;
+			}
+			for (int i = 0; i < indexTrace.size(); i++) {
+				Node node = nodeTrace.get(i);
+				int selectedChild = indexTrace.get(i);
+				node.childrenEvaluations[selectedChild] += 1;
+				if (node.color == winner) {
+					node.childrenRewards[selectedChild] += 1;
+				}
+			}
+		}
 
-// 		}
+		private double ucb1(double childRewards, double childEvaluations, double logParentEvaluations) {
+			double exploitation = childRewards / childEvaluations;
+			double exploration = Math.sqrt(logParentEvaluations / childEvaluations);
+			return exploitation + explorationFactor * exploration;
+		}
 
-// 		private int simulate(State state) {
-// 			rolloutPlayer.useState(state);
-// 			Move move = rolloutPlayer.suggestMove();
-// 			while (move != null) {
-// 				rolloutPlayer.doMove(move);
-// 				move = rolloutPlayer.suggestMove();
-// 			}
-// 			if (state.getColorToMove() == Color.WHITE) {
-// 				return 0;
-// 			} else {
-// 				return 1;
-// 			}
-// 		}
+		@Override
+		public void run() {
+			while (running) {
+				if (root != null) {
+					try {
+						search(state.clone());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 		
-// 	}
+	}
 
-// 	private double ucb1(Node parent, Node child, Color color) {
-// 		double winRatio = computeWinRatio(child, color);
-// 		return winRatio + explorationFactor * Math.sqrt( Math.log(parent.simulations) / child.simulations );
-// 	}
+	private class Node {
 
-// 	private static double computeWinRatio(Node node, Color color) {
-// 		double ratio = (double) node.whiteWins / node.simulations;
-// 		if (color != Color.WHITE) {
-// 			ratio = 1.0 - ratio;
-// 		}
-// 		return Math.min(Math.max(0.0, ratio), 1.0);
-// 	}
+		public Color color;
+		public IntList moves;
+		public Node[] children;
+		public int[] childrenEvaluations;
+		public int[] childrenRewards;
+		public int nextToExpand;
 
-// 	private double computeWinRatio(Color color) {
-// 		return computeWinRatio(root, color);
-// 	}
+		public Node(State state) {
+			this.color = state.getColorToMove();
+			this.moves = new IntList(state.getMaxMoves());
+			moveGenerator.generateMoves(state, moves);
+			this.children = new Node[moves.size()];
+			this.childrenEvaluations = new int[moves.size()];
+			this.childrenRewards = new int[moves.size()];
+			this.nextToExpand = 0;
+		}
 
-// 	private class Node {
+		public boolean needsExpansion() {
+			return nextToExpand < children.length && children[nextToExpand] == null;
+		}
 
-// 		public List<Move> moves;
-// 		public Node[] children;
-// 		public int simulations;
-// 		public int whiteWins;
+		public int size() {
+			return children.length;
+		}
 
-// 		public Node(State state) {
-// 			moves = moveGenerator.generateMoves(state);
-// 			children = new Node[moves.size()];
-// 		}
+	}
 
-// 	}
+	private class RootStats {
 
-// 	public class Stats {
+		public double rewards;
+		public int evaluations;
+		public int maxDepth;
 
-// 		public double whiteWinRatio;
-// 		public int simulations;
-// 		public int maxDepth;
+	}
 
-// 	}
+	public class Stats {
 
-// 	@Override
-// 	public void close() throws Exception {
-// 		if (workerThreads != null) {
-// 			running = false;
-// 			for (Thread thread : workerThreads) {
-// 				thread.join();
-// 			}
-// 			workerThreads = null;
-// 		}
-// 	}
+		public final double whiteWinRatio;
+		public final int evaluations;
+		public final int maxDepth;
+
+		public Stats(RootStats stats) {
+			System.out.println("REWARDS: " + stats.rewards);
+			System.out.println("EVALUATIONS: " + stats.evaluations);
+			this.evaluations = stats.evaluations;
+			this.maxDepth = stats.maxDepth;
+			double rewardRatio = (double) stats.rewards / stats.evaluations;
+			rewardRatio = Math.max(0.0, Math.min(rewardRatio, 1.0));
+			if (state.getColorToMove() == Color.WHITE) {
+				this.whiteWinRatio = rewardRatio;
+			} else {
+				this.whiteWinRatio = 1.0 - rewardRatio;
+			}
+		}
+
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (workerThreads != null) {
+			running = false;
+			for (Thread thread : workerThreads) {
+				thread.join();
+			}
+			workerThreads = null;
+		}
+	}
 	
-// }
+}

@@ -4,6 +4,8 @@ public enum MoveType {
 
 	PICK_QUEEN, MOVE_QUEEN, SHOOT_ARROW;
 
+	public static final int COUNT = 3;
+
 	public MoveType next() {
 		switch (this) {
 			case PICK_QUEEN:

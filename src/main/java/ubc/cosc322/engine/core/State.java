@@ -179,7 +179,7 @@ public class State {
 
 	/** Gets and the positions that can be reached orthogonally or diagonally from a position. */
 	public void traceAll(int source, IntList output) {
-		for (int d = 0; d < Direction.count; d++) {
+		for (int d = 0; d < Direction.COUNT; d++) {
 			int offset = dimensions.getDirectionOffset(d);
 			int position = source + offset;
 			while (!dimensions.outOfBounds(position) && board[position] == Piece.NONE) {
@@ -201,7 +201,7 @@ public class State {
 				generateArrowShots(output);
 				break;
 			default:
-				throw new IllegalStateException("Illegal move type");
+				throw new IllegalStateException("illegal move type");
 		}
 	}
 
@@ -211,7 +211,7 @@ public class State {
 			int queen = freeQueensToMove.get(q);
 			boolean surroundedByArrows = true;
 			boolean trapped = true;
-			for (int d = 0; d < Direction.count; d++) {
+			for (int d = 0; d < Direction.COUNT; d++) {
 				int offset = dimensions.getDirectionOffset(d);
 				int adjacent = queen + offset;
 				if (!dimensions.outOfBounds(adjacent)) {
@@ -244,6 +244,19 @@ public class State {
 
 	public byte getPiece(int position) {
 		return board[position];
+	}
+
+	public int getMaxMoves() {
+		switch (nextMoveType) {
+			case PICK_QUEEN:
+				return MAX_QUEENS_PER_COLOR;
+			case MOVE_QUEEN:
+				return dimensions.maxTrace;
+			case SHOOT_ARROW:
+				return dimensions.maxTrace;
+			default:
+				throw new IllegalStateException("illegal move type");
+		}
 	}
 
 	@Override

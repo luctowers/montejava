@@ -1,6 +1,9 @@
 package ubc.cosc322.engine.core;
 
 public final class Dimensions {
+
+	/** The total numbers spaces on the board. */
+	public final int boardSize;
 	
 	/** The dimensions of the board. */
 	public final int boardWidth, boardHeight;
@@ -30,6 +33,7 @@ public final class Dimensions {
 		if (boardHeight < 4) {
 			throw new IllegalArgumentException("board height must me greater than four");
 		}
+		this.boardSize = boardWidth * boardHeight;
 		this.boardWidth = boardWidth;
 		this.boardHeight = boardHeight;
 		this.maxTrace = boardHeight + boardWidth + 2 * Math.min(boardHeight, boardWidth) - 4;
