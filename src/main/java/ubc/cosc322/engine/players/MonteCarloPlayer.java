@@ -104,7 +104,6 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		Stats stats = new Stats(rootStats);
 		Node node = root;
 		while (maxMoves-- > 0) {
-			System.out.println(Arrays.toString(node.childrenEvaluations));
 			double maxReward = 0.0;
 			int maxIndex = -1;
 			for (int i = 0; node != null && i < node.size(); i++) {
@@ -305,8 +304,6 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		public final int maxDepth;
 
 		public Stats(RootStats stats) {
-			System.out.println("REWARDS: " + stats.rewards);
-			System.out.println("EVALUATIONS: " + stats.evaluations);
 			this.evaluations = stats.evaluations;
 			this.maxDepth = stats.maxDepth;
 			double rewardRatio = (double) stats.rewards / stats.evaluations;
