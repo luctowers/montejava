@@ -21,7 +21,6 @@ public class State {
 	private int moveCount;
 
 	private EnumMap<Color,IntList> untrappedQueens;
-	private EnumMap<Color,IntList> unchamberedQueens;
 
 	private int lastQueenPick, lastQueenMove, lastArrowShot;
 
@@ -33,7 +32,6 @@ public class State {
 		this.untrappedQueens = new EnumMap<>(Color.class);
 		this.untrappedQueens.put(Color.WHITE, new IntList(MAX_QUEENS_PER_COLOR));
 		this.untrappedQueens.put(Color.BLACK, new IntList(MAX_QUEENS_PER_COLOR));
-		this.unchamberedQueens = null;
 		this.lastQueenPick = -1;
 		this.lastQueenMove = -1;
 		this.lastArrowShot = -1;
@@ -64,11 +62,6 @@ public class State {
 		this.untrappedQueens = new EnumMap<>(Color.class);
 		this.untrappedQueens.put(Color.WHITE, other.untrappedQueens.get(Color.WHITE).clone());
 		this.untrappedQueens.put(Color.BLACK, other.untrappedQueens.get(Color.BLACK).clone());
-		if (other.unchamberedQueens != null) {
-			this.unchamberedQueens = new EnumMap<>(Color.class);
-			this.unchamberedQueens.put(Color.WHITE, other.unchamberedQueens.get(Color.WHITE).clone());
-			this.unchamberedQueens.put(Color.BLACK, other.unchamberedQueens.get(Color.BLACK).clone());
-		}
 	}
 
 	public void placeQueen(Color color, int position) {
@@ -159,15 +152,6 @@ public class State {
 				break;
 			}
 		}
-		if (unchamberedQueens != null) {
-			positions = unchamberedQueens.get(color);
-			for (int i = 0; i < positions.size(); i++) {
-				if (positions.get(i) == oldPosition) {
-					positions.set(i, newPosition);
-					break;
-				}
-			}
-		}
 		colorToMove = color;
 		board[oldPosition] = Piece.NONE;
 		board[newPosition] = queen;
@@ -176,11 +160,6 @@ public class State {
 	public IntList getUntrappedQueens(Color color) {
 		// TODO: make this return immutable
 		return untrappedQueens.get(color);
-	}
-
-	public IntList getUnchamberedQueens(Color color) {
-		// TODO: make this return immutable
-		return unchamberedQueens.get(color);
 	}
 
 	public int getMoveCount() {
@@ -287,72 +266,6 @@ public class State {
 			default:
 				throw new IllegalStateException("illegal move type");
 		}
-	}
-
-	public void computeChambers() {
-		if (unchamberedQueens == null) {
-			unchamberedQueens = new EnumMap<>(Color.class);
-			unchamberedQueens.put(Color.WHITE, untrappedQueens.get(Color.WHITE).clone());
-			unchamberedQueens.put(Color.BLACK, untrappedQueens.get(Color.BLACK).clone());
-		}
-		IntList whiteQueens = unchamberedQueens.get(Color.WHITE);
-		IntList whiteQueensCopy = whiteQueens.clone();
-		IntList blackQueens = unchamberedQueens.get(Color.BLACK);
-		IntList blackQueensCopy = blackQueens.clone();
-		computeChambersPrune(whiteQueensCopy, blackQueensCopy, whiteQueens, Color.WHITE);
-		computeChambersPrune(blackQueensCopy, whiteQueensCopy, blackQueens, Color.BLACK);
-	}
-
-	public void computeChambersPrune(IntList queensInQuestion, IntList enemyQueensInQuestion, IntList unchamberedQueens, Color color) {
-		IntList foundQueens = new IntList(MAX_QUEENS_PER_COLOR);
-		for (int i = 0; i < queensInQuestion.size(); i++) {
-			foundQueens.clear();
-			boolean[] visited = new boolean[dimensions.arraySize];
-			visited[queensInQuestion.get(i)] = true;
-			boolean enemyQueenFound = computeChambersDFS(queensInQuestion.get(i), Piece.queenOfColor(color.other()), visited, foundQueens);
-			if (!enemyQueenFound) {
-				unchamberedQueens.removeValue(queensInQuestion.get(i));
-				for (int u = 0; u < foundQueens.size(); u++) {
-					int position = foundQueens.get(u);
-					unchamberedQueens.removeValue(position);
-					queensInQuestion.removeValue(position);
-				}
-			} else if (enemyQueenFound) {
-				for (int u = 0; u < foundQueens.size(); u++) {
-					int position = foundQueens.get(u);
-					byte piece = board[position];
-					if (piece == Piece.queenOfColor(color)) {
-						queensInQuestion.removeValue(position);
-					} else {
-						enemyQueensInQuestion.removeValue(position);
-					}
-				}
-			}
-		}
-	}
-
-	public boolean computeChambersDFS(int position, byte piece, boolean[] visited, IntList output) {
-		for (int d = 0; d < Direction.COUNT; d++) {
-			int offset = dimensions.getDirectionOffset(d);
-			int offsetPosition = position + offset;
-			if (!dimensions.outOfBounds(offsetPosition) && !visited[offsetPosition]) {
-				visited[offsetPosition] = true;
-				byte foundPiece = board[offsetPosition];
-				if (foundPiece == piece) {
-					output.push(offsetPosition);
-					return true;
-				}
-				if (foundPiece == Piece.WHITE_QUEEN || foundPiece == Piece.BLACK_QUEEN) {
-					output.push(offsetPosition);
-				}
-				if (foundPiece != Piece.ARROW) {
-					if (computeChambersDFS(offsetPosition, piece, visited, output)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
