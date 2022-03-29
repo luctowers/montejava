@@ -8,15 +8,14 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.generators.MoveGenerator;
+import ubc.cosc322.engine.heuristics.Heuristic;
 import ubc.cosc322.engine.util.IntList;
 
 /** A player that uses a multi-threaded Monte Carlo Tree Search. */
 public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	private volatile boolean running;
-	private Supplier<Player> rolloutPlayerSupplier;
-	private MoveGenerator moveGenerator;
+	private Supplier<Heuristic> heuristicSupplier;
 	private int thinkingMillis;
 	private double explorationFactor;
 	private Thread[] workerThreads;
@@ -25,13 +24,12 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	private volatile RootStats rootStats;
 	private Stats publicStats;
 
-	public MonteCarloPlayer(MoveGenerator moveGenerator, Supplier<Player> rolloutPlayerSupplier, int threadCount, int thinkingMillis, double explorationFactor) {
+	public MonteCarloPlayer(Supplier<Heuristic> heuristicSupplier, int threadCount, int thinkingMillis, double explorationFactor) {
 		this.running = false;
-		this.moveGenerator = moveGenerator;
 		this.thinkingMillis = thinkingMillis;
 		this.explorationFactor = explorationFactor;
 		this.threadCount = threadCount;
-		this.rolloutPlayerSupplier = rolloutPlayerSupplier;
+		this.heuristicSupplier = heuristicSupplier;
 	}
 
 	@Override
@@ -136,16 +134,14 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	private class Worker implements Runnable {
 
-		private Player rolloutPlayer;
-		IntList indexTrace;
-		ArrayList<Node> nodeTrace;
-		IntList simulationBuffer;
+		private Heuristic heuristic;
+		private IntList indexTrace;
+		private ArrayList<Node> nodeTrace;
 
 		public Worker() {
-			this.rolloutPlayer = rolloutPlayerSupplier.get();
+			this.heuristic = heuristicSupplier.get();
 			this.indexTrace = new IntList(state.dimensions.boardSize * MoveType.COUNT);
 			this.nodeTrace = new ArrayList<>(state.dimensions.boardSize * MoveType.COUNT);
-			this.simulationBuffer = new IntList(MoveType.COUNT);
 		}
 
 		private void search(State searchState) {
@@ -205,9 +201,8 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 				// expansion
 				Node expandedNode = new Node(searchState);
 				// simulation
-				winner = simulate(searchState);
+				winner = evaluate(searchState);
 				// attach expanded node
-				// this if statement is needed to prevent inconcsistent views when multithreading
 				previousNode.children[selectedChild] = expandedNode;
 
 			}
@@ -240,13 +235,16 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			return maxScoreIndex;
 		}
 
-		private Color simulate(State state) {
-			rolloutPlayer.useState(state);
-			do {
-				simulationBuffer.clear();
-				rolloutPlayer.suggestAndDoMoves(MoveType.COUNT, simulationBuffer);
-			} while (simulationBuffer.size() != 0);
-			return state.getColorToMove().other();
+		private Color evaluate(State state) {
+			int eval = heuristic.evaluate(state);
+			// System.out.println(eval);
+			if (eval > 0) {
+				return Color.WHITE;
+			} else if (eval < 0) {
+				return Color.BLACK;
+			} else {
+				return null;
+			}
 		}
 
 		private void backpropogate(RootStats cachedRootStats, Color winner) {
@@ -299,7 +297,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			this.moveCount = state.getMoveCount();
 			this.color = state.getColorToMove();
 			this.moves = new IntList(state.getMaxMoves());
-			moveGenerator.generateMoves(state, moves);
+			state.generateMoves(moves);
 			this.children = new Node[moves.size()];
 			this.childrenEvaluations = new double[moves.size()];
 			this.childrenRewards = new double[moves.size()];

@@ -3,10 +3,8 @@ package ubc.cosc322;
 import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
-import ubc.cosc322.engine.generators.LegalMoveGenerator;
-import ubc.cosc322.engine.generators.UnchamberedMoveGenerator;
+import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 
 public class LocalTest {
@@ -17,12 +15,17 @@ public class LocalTest {
 
 		State initialState = new State(); // standard 10x10 4 queen board
 
-		MonteCarloPlayer white = new MonteCarloPlayer(new LegalMoveGenerator(), () -> new RandomMovePlayer(new LegalMoveGenerator()), 8, 1000, 0.3);;
-		Player black = new RandomMovePlayer(new LegalMoveGenerator());
+		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.3);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.5);
+		// MonteCarloPlayer black = new MonteCarloPlayer(() -> new PartialRolloutHeuristic(new RandomMovePlayer(), new MobilityHeuristic(), 90), 4, 1000, 0.3);
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
 
-			// analyzer.onTurn(state -> System.out.println(white.getStats().evaluations));
+			analyzer.onTurn(state -> {
+				System.out.println(state);
+				System.out.println(white.getStats().whiteWinRatio);
+				System.out.println(black.getStats().whiteWinRatio);
+			});
 			System.out.println("iteration count: " + ITERATION_COUNT);
 
 			long startTime = System.currentTimeMillis();

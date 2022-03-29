@@ -10,8 +10,7 @@ import java.util.Random;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.generators.LegalMoveGenerator;
-import ubc.cosc322.engine.generators.UnchamberedMoveGenerator;
+import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -84,11 +83,10 @@ public class COSC322Test extends GamePlayer {
 		// uniform random rollout player
 		// availableProcessors returns the number of cores in the system
 		// 28sec < 30sec deadline
-		// 0.3 exploration factor 
+		// 0.5 exploration factor
 		this.ai = new MonteCarloPlayer(
-			new LegalMoveGenerator(),
-			() -> new RandomMovePlayer(new LegalMoveGenerator()),
-			Runtime.getRuntime().availableProcessors(), 1000, 0.5
+			() -> new RolloutHeuristic(new RandomMovePlayer()),
+			Runtime.getRuntime().availableProcessors(), 1000, 1.0
 		);
 	}
 

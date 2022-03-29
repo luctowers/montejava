@@ -19,6 +19,10 @@ public final class IntList {
 		return size;
 	}
 
+	public int capacity() {
+		return array.length;
+	}
+
 	public void push(int n) {
 		array[size] = n;
 		size++;
