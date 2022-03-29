@@ -30,9 +30,9 @@ public abstract class Player {
 
 	public Turn suggestAndDoTurn() {
 		// DEBUG ASSERTION
-		if (state.getNextMoveType() != MoveType.PICK_QUEEN) {
-			throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
-		}
+		// if (state.getNextMoveType() != MoveType.PICK_QUEEN) {
+		// 	throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
+		// }
 		IntList moves = new IntList(3);
 		int lastSize = 0;
 		while (moves.size() != 3) {

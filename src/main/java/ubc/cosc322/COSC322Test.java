@@ -11,6 +11,7 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.State;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
+import ubc.cosc322.engine.generators.UnchamberedMoveGenerator;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -87,7 +88,7 @@ public class COSC322Test extends GamePlayer {
 		this.ai = new MonteCarloPlayer(
 			new LegalMoveGenerator(),
 			() -> new RandomMovePlayer(new LegalMoveGenerator()),
-			Runtime.getRuntime().availableProcessors(), 1000, 0.3
+			Runtime.getRuntime().availableProcessors(), 1000, 0.5
 		);
 	}
 

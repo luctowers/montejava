@@ -39,9 +39,6 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 			whitePlayer.useState(initialState.clone());
 			blackPlayer.useState(initialState.clone());
 			while (true) {
-				for (Consumer<State> callback : turnCallbacks) {
-					callback.accept(playState);
-				}
 				Player playerToMove, playerToWait;
 				if (playState.getColorToMove() == Color.WHITE) {
 					playerToMove = whitePlayer;
@@ -56,6 +53,9 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 				}
 				playerToWait.doTurn(turn);
 				playState.doTurn(turn);
+				for (Consumer<State> callback : turnCallbacks) {
+					callback.accept(playState);
+				}
 			}
 			for (Consumer<State> callback : endCallbacks) {
 				callback.accept(playState);

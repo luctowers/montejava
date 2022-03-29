@@ -32,28 +32,38 @@ public final class IntList {
 
 	public int get(int i) {
 		// DEBUG ASSERTION
-		if (i < 0 || i >= size) {
-			throw new IndexOutOfBoundsException();
-		}
+		// if (i < 0 || i >= size) {
+		// 	throw new IndexOutOfBoundsException();
+		// }
 		return array[i];
 	}
 
 	public void set(int i, int n) {
 		// DEBUG ASSERTION
-		if (i < 0 || i >= size) {
-			throw new IndexOutOfBoundsException();
-		}
+		// if (i < 0 || i >= size) {
+		// 	throw new IndexOutOfBoundsException();
+		// }
 		array[i] = n;
 	}
 
-	public void remove(int i) {
+	public void removeIndex(int i) {
 		// DEBUG ASSERTION
-		if (i < 0 || i >= size) {
-			throw new IndexOutOfBoundsException();
-		}
+		// if (i < 0 || i >= size) {
+		// 	throw new IndexOutOfBoundsException();
+		// }
 		int copyLength = size - 1 - i;
 		System.arraycopy(array, i+1, array, i, copyLength);
 		size--;
+	}
+
+	public boolean removeValue(int n) {
+		for (int i = 0; i < size; i++) {
+			if (array[i] == n) {
+				removeIndex(i);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public int search(int n) {
