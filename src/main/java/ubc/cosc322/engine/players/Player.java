@@ -33,10 +33,10 @@ public abstract class Player {
 		// if (state.getNextMoveType() != MoveType.PICK_QUEEN) {
 		// 	throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
 		// }
-		IntList moves = new IntList(3);
+		IntList moves = new IntList(MoveType.COUNT);
 		int lastSize = 0;
-		while (moves.size() != 3) {
-			suggestAndDoMoves(3 - lastSize, moves);
+		while (moves.size() != MoveType.COUNT) {
+			suggestAndDoMoves(MoveType.COUNT - lastSize, moves);
 			int received = moves.size() - lastSize;
 			if (received == 0) {
 				return null;
@@ -45,8 +45,7 @@ public abstract class Player {
 		}
 		return new Turn(
 			moves.get(0),
-			moves.get(1),
-			moves.get(2)
+			moves.get(1)
 		);
 	}
 

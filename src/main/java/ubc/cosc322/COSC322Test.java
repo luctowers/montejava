@@ -83,10 +83,10 @@ public class COSC322Test extends GamePlayer {
 		// uniform random rollout player
 		// availableProcessors returns the number of cores in the system
 		// 28sec < 30sec deadline
-		// 0.5 exploration factor
+		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
 			() -> new RolloutHeuristic(new RandomMovePlayer()),
-			Runtime.getRuntime().availableProcessors(), 1000, 1.0
+			Runtime.getRuntime().availableProcessors(), 5000, 0.3
 		);
 	}
 

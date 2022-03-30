@@ -56,9 +56,9 @@ public class COSC322Converter {
 	/** encode's a turn from the engine into a format that can be sent to the server */
 	public static Map<String, Object> encodeTurn(Turn turn, Dimensions dimensions) {
 		HashMap<String,Object> result = new HashMap<>();
-		ArrayList<Integer> queenSource = encodePosition(turn.queenPick, dimensions);
-		ArrayList<Integer> queenDestination = encodePosition(turn.queenMove, dimensions);
-		ArrayList<Integer> arrowDestination = encodePosition(turn.arrowShot, dimensions);
+		ArrayList<Integer> queenSource = encodePosition(turn.getQueenSource(), dimensions);
+		ArrayList<Integer> queenDestination = encodePosition(turn.getQueenDestination(), dimensions);
+		ArrayList<Integer> arrowDestination = encodePosition(turn.getArrowDestination(), dimensions);
 		result.put(AmazonsGameMessage.QUEEN_POS_CURR, queenSource);
 		result.put(AmazonsGameMessage.ARROW_POS, arrowDestination);
 		result.put(AmazonsGameMessage.QUEEN_POS_NEXT, queenDestination);

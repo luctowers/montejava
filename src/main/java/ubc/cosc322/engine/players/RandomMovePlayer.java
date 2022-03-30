@@ -11,7 +11,7 @@ public class RandomMovePlayer extends Player {
 
 	public RandomMovePlayer() {
 		this.randomGenerator = new Random();
-		this.moveBuffer = new IntList(35);
+		this.moveBuffer = new IntList(4*35);
 	}
 
 	@Override

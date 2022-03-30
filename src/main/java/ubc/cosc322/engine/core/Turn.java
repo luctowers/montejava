@@ -3,15 +3,28 @@ package ubc.cosc322.engine.core;
 /** A single turn in the Game of Amazons. A turn has two moves, a queen move and an arrow move. */
 public class Turn {
 	
-	/** The positions involved in a turn.
-	 * Each positional must be orthogonal or diagonal to the preceding position.
-	 */
-	public final int queenPick, queenMove, arrowShot;
+	public final int queenMove, arrowMove;
 
-	public Turn(int queenPick, int queenMove, int arrowShot) {
-		this.queenPick = queenPick;
+	public Turn(int queenMove, int arrowMove) {
 		this.queenMove = queenMove;
-		this.arrowShot = arrowShot;
+		this.arrowMove = arrowMove;
+	}
+
+	public Turn(int queenSource, int queenDestination, int arrowMove) {
+		this.queenMove = Move.encodeQueenMove(queenSource, queenDestination);
+		this.arrowMove = arrowMove;
+	}
+
+	public int getQueenSource() {
+		return Move.decodeQueenSource(queenMove);
+	}
+
+	public int getQueenDestination() {
+		return Move.decodeQueenDestination(queenMove);
+	}
+
+	public int getArrowDestination() {
+		return arrowMove;
 	}
 
 }

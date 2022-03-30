@@ -21,13 +21,7 @@ public class COSC322Validator {
 
 	public static boolean validate(State state, Turn turn) {
 		state = state.clone();
-		IntList moves = new IntList(state.dimensions.maxTrace);
-		state.generateMoves(moves);
-		if (moves.search(turn.queenPick) == -1) {
-			return false;
-		}
-		state.doMove(turn.queenPick);
-		moves.clear();
+		IntList moves = new IntList(state.getMaxMovesAbsolute());
 		state.generateMoves(moves);
 		if (moves.search(turn.queenMove) == -1) {
 			return false;
@@ -35,7 +29,7 @@ public class COSC322Validator {
 		state.doMove(turn.queenMove);
 		moves.clear();
 		state.generateMoves(moves);
-		if (moves.search(turn.arrowShot) == -1) {
+		if (moves.search(turn.arrowMove) == -1) {
 			return false;
 		}
 		return true;

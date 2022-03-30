@@ -67,7 +67,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		publicStats = new Stats(rootStats);
 		super.doTurn(turn);
 		// state.computeChambers();
-		if (!rebase(turn.queenPick) || !rebase(turn.queenMove) || !rebase(turn.arrowShot)) {
+		if (!rebase(turn.queenMove) || !rebase(turn.arrowMove)) {
 			this.root = new Node(state);
 			this.rootStats = new RootStats();
 		}
