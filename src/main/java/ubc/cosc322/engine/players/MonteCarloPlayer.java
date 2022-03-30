@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.MoveType;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.heuristics.Heuristic;
 import ubc.cosc322.engine.util.IntList;
@@ -33,15 +33,15 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	}
 
 	@Override
-	public void useState(State state) {
+	public void useState(Board board) {
 		try {
 			close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		super.useState(state);
-		// state.computeChambers();
-		this.root = new Node(state);
+		super.useState(board);
+		// board.computeChambers();
+		this.root = new Node(board);
 		this.rootStats = new RootStats();
 		this.running = true;
 		this.workerThreads = new Thread[threadCount];
@@ -55,9 +55,9 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	public void doMove(int move) {
 		publicStats = new Stats(rootStats);
 		super.doMove(move);
-		// state.computeChambers();
+		// board.computeChambers();
 		if (!rebase(move)) {
-			this.root = new Node(state);
+			this.root = new Node(board);
 			this.rootStats = new RootStats();
 		}
 	}
@@ -66,9 +66,9 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	public void doTurn(Turn turn) {
 		publicStats = new Stats(rootStats);
 		super.doTurn(turn);
-		// state.computeChambers();
+		// board.computeChambers();
 		if (!rebase(turn.queenMove) || !rebase(turn.arrowMove)) {
-			this.root = new Node(state);
+			this.root = new Node(board);
 			this.rootStats = new RootStats();
 		}
 	}
@@ -140,11 +140,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 		public Worker() {
 			this.heuristic = heuristicSupplier.get();
-			this.indexTrace = new IntList(state.dimensions.boardSize * MoveType.COUNT);
-			this.nodeTrace = new ArrayList<>(state.dimensions.boardSize * MoveType.COUNT);
+			this.indexTrace = new IntList(board.dimensions.boardSize * MoveType.COUNT);
+			this.nodeTrace = new ArrayList<>(board.dimensions.boardSize * MoveType.COUNT);
 		}
 
-		private void search(State searchState) {
+		private void search(Board searchState) {
 
 			// get a reference to the stats object now
 			// if we got it later, it might have changed
@@ -159,7 +159,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			Node selectedNode = root;
 			int selectedChild = -1;
 			do {
-				// this if statement is needed to prevent inconcsistent views when multithreading
+				// this if boardment is needed to prevent inconcsistent views when multithreading
 				if (selectedNode.moveCount != searchState.getMoveCount()) {
 					// System.out.println("MISMATCH PREVENTED");
 					return;
@@ -184,11 +184,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			Color winner;
 			if (selectedChild == -1) {
 
-				// terminal state
+				// terminal board
 				winner = searchState.getColorToMove().other();
 
 				// DEBUG ASSERTION
-				// check for bad terminal states
+				// check for bad terminal boards
 				// IntList moves = new IntList(100);
 				// searchState.generateMoves(moves);
 				// if (moves.size() != 0) {
@@ -235,8 +235,8 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			return maxScoreIndex;
 		}
 
-		private Color evaluate(State state) {
-			int eval = heuristic.evaluate(state);
+		private Color evaluate(Board board) {
+			int eval = heuristic.evaluate(board);
 			// System.out.println(eval);
 			if (eval > 0) {
 				return Color.WHITE;
@@ -249,7 +249,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 		private void backpropogate(RootStats cachedRootStats, Color winner) {
 			cachedRootStats.evaluations.incrementAndGet();
-			if (state.getColorToMove() == winner) {
+			if (board.getColorToMove() == winner) {
 				cachedRootStats.rewards.incrementAndGet();
 			}
 			for (int i = 0; i < indexTrace.size(); i++) {
@@ -273,7 +273,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			while (running) {
 				if (root != null) {
 					try {
-						search(state.clone());
+						search(board.clone());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -293,11 +293,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		public double[] childrenRewards;
 		public int nextToExpand;
 
-		public Node(State state) {
-			this.moveCount = state.getMoveCount();
-			this.color = state.getColorToMove();
-			this.moves = new IntList(state.getMaxMoves());
-			state.generateMoves(moves);
+		public Node(Board board) {
+			this.moveCount = board.getMoveCount();
+			this.color = board.getColorToMove();
+			this.moves = new IntList(board.getMaxMoves());
+			board.generateMoves(moves);
 			this.children = new Node[moves.size()];
 			this.childrenEvaluations = new double[moves.size()];
 			this.childrenRewards = new double[moves.size()];
@@ -338,7 +338,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			this.maxDepth = stats.maxDepth;
 			double rewardRatio = stats.rewards.doubleValue() / stats.evaluations.doubleValue();
 			rewardRatio = Math.max(0.0, Math.min(rewardRatio, 1.0));
-			if (state.getColorToMove() == Color.WHITE) {
+			if (board.getColorToMove() == Color.WHITE) {
 				this.whiteWinRatio = rewardRatio;
 			} else {
 				this.whiteWinRatio = 1.0 - rewardRatio;

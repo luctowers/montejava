@@ -2,7 +2,7 @@ package ubc.cosc322;
 
 import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.Player;
@@ -14,20 +14,21 @@ public class LocalTest {
 
 		final int ITERATION_COUNT = 1;
 
-		State initialState = new State(); // standard 10x10 4 queen board
+		Board initialState = new Board(); // standard 10x10 4 queen board
 
 		Player white = new RandomMovePlayer();
 		// Player black = new RandomMovePlayer();
 		// MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.3);
-		MonteCarloPlayer black = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.5);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 5000, 0.5);
 		// MonteCarloPlayer black = new MonteCarloPlayer(() -> new PartialRolloutHeuristic(new RandomMovePlayer(), new MobilityHeuristic(), 90), 4, 1000, 0.3);
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
 
-			analyzer.onTurn(state -> {
-				System.out.println(state);
+			analyzer.onTurn(board -> {
+				System.out.println(board);
 				// System.out.println(white.getStats().whiteWinRatio);
 				System.out.println(black.getStats().whiteWinRatio);
+				System.out.println(black.getStats().evaluations);
 			});
 			System.out.println("iteration count: " + ITERATION_COUNT);
 

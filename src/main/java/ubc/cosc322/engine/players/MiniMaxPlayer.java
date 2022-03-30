@@ -42,15 +42,15 @@
 
 // 		if (depth == 0) {
 
-// 			node.value = heuristic.evaluate(state);
+// 			node.value = heuristic.evaluate(board);
 
-// 		} else if (state.getColorToMove() == Color.WHITE) { // white is the maximizing player
+// 		} else if (board.getColorToMove() == Color.WHITE) { // white is the maximizing player
 
 // 			node.value = Integer.MIN_VALUE;
-// 			for (Move move : moveGenerator.generateMoves(state)) {
-// 				state.doMove(move);
+// 			for (Move move : moveGenerator.generateMoves(board)) {
+// 				board.doMove(move);
 // 				Node child = miniMax(depth-1, alpha, beta);
-// 				state.undoMove();
+// 				board.undoMove();
 // 				if (child.value >= node.value) {
 // 					node.child = child;
 // 					node.value = child.value;
@@ -62,13 +62,13 @@
 // 				}
 // 			}
 
-// 		} else if (state.getColorToMove() == Color.BLACK) { // white is the minimizing player
+// 		} else if (board.getColorToMove() == Color.BLACK) { // white is the minimizing player
 
 // 			node.value = Integer.MAX_VALUE;
-// 			for (Move move : moveGenerator.generateMoves(state)) {
-// 				state.doMove(move);
+// 			for (Move move : moveGenerator.generateMoves(board)) {
+// 				board.doMove(move);
 // 				Node child = miniMax(depth-1, alpha, beta);
-// 				state.undoMove();
+// 				board.undoMove();
 // 				if (child.value <= node.value) {
 // 					node.child = child;
 // 					node.value = child.value;

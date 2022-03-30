@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Random;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
@@ -127,9 +127,9 @@ public class COSC322Test extends GamePlayer {
 		if (gamegui != null) {
 			gamegui.setGameState((ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE));
 		}
-		State state = COSC322Converter.decodeBoardState(msgDetails);
-		System.out.println(state);
-		ai.useState(state);
+		Board board = COSC322Converter.decodeBoardState(msgDetails);
+		System.out.println(board);
+		ai.useState(board);
 		// reset aiColor in-case it was set in a previous game
 		aiColor = null;
 		timer.stop();
@@ -205,11 +205,11 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging to provide game history to the terminal */
 	private void logState() {
-		State state = ai.getState();
-		System.out.println(state);
+		Board board = ai.getState();
+		System.out.println(board);
 		if (aiColor == null) {
 			System.out.println("WE ARE SPECTATING");
-		} else if (state.getColorToMove() == aiColor) {
+		} else if (board.getColorToMove() == aiColor) {
 			System.out.println("OUR turn, we are " + aiColor);
 		} else {
 			System.out.println("OPPONENT'S turn, we are " + aiColor);

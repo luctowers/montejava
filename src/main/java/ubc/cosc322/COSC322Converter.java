@@ -7,37 +7,37 @@ import java.util.Map;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Dimensions;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
 /** provides utility functions to convert between the server/client formats and our engine's formats */
 public class COSC322Converter {
 	
-	/** decodes the servers board state format and converts it to our format */
+	/** decodes the servers board board format and converts it to our format */
 	@SuppressWarnings("unchecked")
-	public static State decodeBoardState(Map<String, Object> msgDetails) {
-		ArrayList<Integer> board = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
+	public static Board decodeBoardState(Map<String, Object> msgDetails) {
+		ArrayList<Integer> boardArray = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
 		// the game messages use 1-based indexing 11x11 board
 		// instead of 0-based 10x10 board for reason
-		if (board.size() != 121) {
+		if (boardArray.size() != 121) {
 			throw new IllegalArgumentException("board size is not 10x10");
 		}
-		State state = new State(new Dimensions(10, 10));
+		Board board = new Board(new Dimensions(10, 10));
 		for (int x = 1; x <= 10; x++) {
 			for (int y = 1; y <= 10; y++) {
-				int piece = board.get(x+y*11);
-				int position = state.dimensions.position(x-1, y-1);
+				int piece = boardArray.get(x+y*11);
+				int position = board.dimensions.position(x-1, y-1);
 				if (piece == 1) {
-					state.placeQueen(Color.BLACK, position);
+					board.placeQueen(Color.BLACK, position);
 				} else if (piece == 2) {
-					state.placeQueen(Color.WHITE, position);
+					board.placeQueen(Color.WHITE, position);
 				} else if (piece == 3) {
-					state.placeArrow(position);
+					board.placeArrow(position);
 				}
 			}
 		}
-		return state;
+		return board;
 	}
 
 	/** decodes the server's turn format and converts it to our format */

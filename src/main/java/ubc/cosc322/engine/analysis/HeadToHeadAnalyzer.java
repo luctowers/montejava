@@ -7,19 +7,19 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.players.Player;
 
 public class HeadToHeadAnalyzer implements AutoCloseable {
 
-	State initialState;
+	Board initialState;
 	Player whitePlayer, blackPlayer;
 	private Map<Color,Integer> winCounts;
-	private List<Consumer<State>> turnCallbacks;
-	private List<Consumer<State>> endCallbacks;
+	private List<Consumer<Board>> turnCallbacks;
+	private List<Consumer<Board>> endCallbacks;
 	
-	public HeadToHeadAnalyzer(State initialState, Player whitePlayer, Player blackPlayer) {
+	public HeadToHeadAnalyzer(Board initialState, Player whitePlayer, Player blackPlayer) {
 		if (whitePlayer == blackPlayer) {
 			throw new IllegalArgumentException("seperate players required");
 		}
@@ -35,7 +35,7 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 
 	public void play(int n) {
 		for (int i = 0; i < n; i++) {
-			State playState = initialState.clone();
+			Board playState = initialState.clone();
 			whitePlayer.useState(initialState.clone());
 			blackPlayer.useState(initialState.clone());
 			while (true) {
@@ -53,11 +53,11 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 				}
 				playerToWait.doTurn(turn);
 				playState.doTurn(turn);
-				for (Consumer<State> callback : turnCallbacks) {
+				for (Consumer<Board> callback : turnCallbacks) {
 					callback.accept(playState);
 				}
 			}
-			for (Consumer<State> callback : endCallbacks) {
+			for (Consumer<Board> callback : endCallbacks) {
 				callback.accept(playState);
 			}
 			Color winner = playState.getColorToMove().other();
@@ -82,11 +82,11 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 		return winCounts.get(Color.WHITE).intValue() + winCounts.get(Color.BLACK).intValue();
 	}
 
-	public void onTurn(Consumer<State> callback) {
+	public void onTurn(Consumer<Board> callback) {
 		turnCallbacks.add(callback);
 	}
 
-	public void onEnd(Consumer<State> callback) {
+	public void onEnd(Consumer<Board> callback) {
 		endCallbacks.add(callback);
 	}
 

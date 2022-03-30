@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import ubc.cosc322.engine.util.ConsoleColors;
 import ubc.cosc322.engine.util.IntList;
 
-/** A complete mutable board state of the game of amazons. */
-public class State {
+/** A complete mutable board board of the game of amazons. */
+public class Board {
 
 	public static final int MAX_QUEENS_PER_COLOR = 4;
 
@@ -24,7 +24,7 @@ public class State {
 
 	private int lastQueenSource, lastQueenDestination, lastArrowMove;
 
-	public State(Dimensions dimensions) {
+	public Board(Dimensions dimensions) {
 		this.dimensions = dimensions;
 		this.board = new byte[dimensions.arrayWidth*dimensions.arrayHeight];
 		this.colorToMove = Color.WHITE;
@@ -38,7 +38,7 @@ public class State {
 		this.moveCount = 0;
 	}
 
-	public State() {
+	public Board() {
 		this(new Dimensions(10, 10));
 		placeQueen(Color.WHITE, dimensions.position(0, 3));
 		placeQueen(Color.WHITE, dimensions.position(3, 0));
@@ -50,7 +50,7 @@ public class State {
 		placeQueen(Color.BLACK, dimensions.position(9, 6));
 	}
 
-	private State(State other) {
+	private Board(Board other) {
 		this.dimensions = other.dimensions;
 		this.board = other.board.clone();
 		this.colorToMove = other.colorToMove;
@@ -225,9 +225,9 @@ public class State {
 	}
 
 	@Override
-	public State clone()
+	public Board clone()
     {
-		return new State(this);
+		return new Board(this);
     }
 
 	@Override

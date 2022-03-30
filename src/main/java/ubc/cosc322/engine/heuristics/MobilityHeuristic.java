@@ -1,7 +1,7 @@
 package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.util.IntList;
 
@@ -15,15 +15,15 @@ public class MobilityHeuristic implements Heuristic {
 	}
 
 	@Override
-	public int evaluate(State state) {
+	public int evaluate(Board board) {
 		int heuristic = 0;
 		// compute for both white and black
 		for (Color color : Color.values()) {
 			// count the positions that can be reached by queens of that color
 			int mobility = 0;
-			IntList queens = state.getUntrappedQueens(color);
+			IntList queens = board.getUntrappedQueens(color);
 			for (int i = 0; i < queens.size(); i++) {
-				state.traceAll(queens.get(i), traceBuffer);
+				board.traceAll(queens.get(i), traceBuffer);
 				mobility += traceBuffer.size();
 				traceBuffer.clear();
 			}

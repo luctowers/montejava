@@ -1,12 +1,12 @@
 package ubc.cosc322;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.util.IntList;
 
 public class COSC322Validator {
 	
-	public static boolean validateAndLog(State state, Turn turn) {
-		boolean result = validate(state, turn);
+	public static boolean validateAndLog(Board board, Turn turn) {
+		boolean result = validate(board, turn);
 		if (result) {
 			System.out.println("RECEIVED MOVE IS VALID");
 		} else {
@@ -19,16 +19,16 @@ public class COSC322Validator {
 		return result;
 	}
 
-	public static boolean validate(State state, Turn turn) {
-		state = state.clone();
-		IntList moves = new IntList(state.getMaxMovesAbsolute());
-		state.generateMoves(moves);
+	public static boolean validate(Board board, Turn turn) {
+		board = board.clone();
+		IntList moves = new IntList(board.getMaxMovesAbsolute());
+		board.generateMoves(moves);
 		if (moves.search(turn.queenMove) == -1) {
 			return false;
 		}
-		state.doMove(turn.queenMove);
+		board.doMove(turn.queenMove);
 		moves.clear();
-		state.generateMoves(moves);
+		board.generateMoves(moves);
 		if (moves.search(turn.arrowMove) == -1) {
 			return false;
 		}

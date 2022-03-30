@@ -1,7 +1,7 @@
 package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.util.IntList;
 
@@ -18,8 +18,8 @@ public class PartialRolloutHeuristic implements Heuristic {
 	}
 
 	@Override
-	public int evaluate(State state) {
-		player.useState(state);
+	public int evaluate(Board board) {
+		player.useState(board);
 		int totalMoves = 0;
 		do {
 			simulationBuffer.clear();
@@ -27,15 +27,15 @@ public class PartialRolloutHeuristic implements Heuristic {
 			totalMoves += simulationBuffer.size();
 		} while (totalMoves < simulationBuffer.capacity() && simulationBuffer.size() != 0);
 		simulationBuffer.clear();
-		state.generateMoves(simulationBuffer);
+		board.generateMoves(simulationBuffer);
 		if (simulationBuffer.size() == 0) {
-			if (state.getColorToMove() == Color.WHITE) {
+			if (board.getColorToMove() == Color.WHITE) {
 				return -1;
 			} else {
 				return 1;
 			}
 		} else {
-			return heuristic.evaluate(state);
+			return heuristic.evaluate(board);
 		}
 	}
 

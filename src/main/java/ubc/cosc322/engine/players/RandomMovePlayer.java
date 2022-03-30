@@ -17,7 +17,7 @@ public class RandomMovePlayer extends Player {
 	@Override
 	public void suggestAndDoMoves(int maxMoves, IntList output) {
 		for (int i = 0; i < maxMoves; i++) {
-			state.generateMoves(moveBuffer);
+			board.generateMoves(moveBuffer);
 			if (moveBuffer.size() == 0) {
 				return;
 			}
