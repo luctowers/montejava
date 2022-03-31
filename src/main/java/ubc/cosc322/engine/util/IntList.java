@@ -1,5 +1,7 @@
 package ubc.cosc322.engine.util;
 
+import java.util.Arrays;
+
 public final class IntList {
 	
 	private int[] array;
@@ -86,6 +88,10 @@ public final class IntList {
 			}
 		}
 		return false;
+	}
+
+	public void sort() {
+		Arrays.sort(array, 0, size);
 	}
 
 	public void clear() {

@@ -8,10 +8,12 @@ public class EndgameHeuristic implements Heuristic {
 
 	IntList whiteChambers;
 	IntList blackChambers;
+	IntList allChambers;
 
 	public EndgameHeuristic() {
 		this.whiteChambers = new IntList(Board.MAX_QUEENS_PER_COLOR);
 		this.blackChambers = new IntList(Board.MAX_QUEENS_PER_COLOR);
+		this.allChambers = new IntList(2*Board.MAX_QUEENS_PER_COLOR);
 	}
 
 	@Override
@@ -19,6 +21,7 @@ public class EndgameHeuristic implements Heuristic {
 		int territory = 0;
 		whiteChambers.clear();
 		blackChambers.clear();
+		allChambers.clear();
 		IntList whiteQueens = board.getUntrappedQueens(Color.WHITE);
 		IntList blackQueens = board.getUntrappedQueens(Color.BLACK);
 		territory -= whiteQueens.size();
@@ -28,24 +31,42 @@ public class EndgameHeuristic implements Heuristic {
 			if (q < whiteQueens.size()) {
 				int queen = whiteQueens.get(q);
 				int chamber = board.getPositionChamber(queen);
-				if (blackChambers.contains(chamber)) {
+				if (blackChambers.contains(chamber) && board.getChamberSize(chamber) > 4) {
 					return 0;
 				}
+				allChambers.push(chamber);
 				if (!whiteChambers.contains(chamber)) {
 					whiteChambers.push(chamber);
 					territory += board.getChamberSize(chamber);
 				}
 			}
 			if (q < blackQueens.size()) {
-				int queen = whiteQueens.get(q);
+				int queen = blackQueens.get(q);
 				int chamber = board.getPositionChamber(queen);
-				if (whiteChambers.contains(chamber)) {
+				if (whiteChambers.contains(chamber) && board.getChamberSize(chamber) > 4) {
 					return 0;
 				}
+				allChambers.push(chamber);
 				if (!blackChambers.contains(chamber)) {
 					blackChambers.push(chamber);
 					territory -= board.getChamberSize(chamber);
 				}
+			}
+		}
+		allChambers.sort();
+		int count = 1;
+		int currentChamber = allChambers.get(0);
+		for (int i = 1; i < allChambers.size(); i++) {
+			int nextChamber = allChambers.get(i);
+			if (nextChamber == currentChamber) {
+				count++;
+			} else {
+				if (count < board.getChamberSize(currentChamber)) {
+					if (whiteChambers.contains(currentChamber) && blackChambers.contains(currentChamber)) {
+						return 0;
+					}
+				}
+				currentChamber = nextChamber;
 			}
 		}
 		if (territory != 0) {

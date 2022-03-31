@@ -1,5 +1,7 @@
 package ubc.cosc322.engine.core;
 
+import java.util.Arrays;
+
 import ubc.cosc322.engine.util.IntList;
 
 public class ChamberAnalyzer {
@@ -51,25 +53,15 @@ public class ChamberAnalyzer {
 							groupSizes[i] += groupSizes[j];
 						} else {
 							groupMappings[i] = groupMappings[groupMappings[j]];
-							groupSizes[groupMappings[j]] += groupSizes[i];
 						}
 					}
+				}
+				if (groupMappings[i] != i) {
+					groupSizes[groupMappings[i]] += groupSizes[i];
 				}
 			}
 			previousBase = nextBase;
 		}
-
-		// System.out.println(Arrays.toString(groupMappings));
-		// for (int y = 0; y < dimensions.boardHeight; y++) {
-		// 	for (int x = 0; x < dimensions.boardWidth; x++) {
-		// 		int mapping = groupBoard[dimensions.position(x, y)];
-		// 		System.out.printf("%02d", mapping);
-		// 		System.out.print(',');
-		// 		if (x == dimensions.boardWidth - 1) {
-		// 			System.out.println();
-		// 		}
-		// 	}
-		// }
 	}
 
 	private void computeGroupMasks(int row, int y) {

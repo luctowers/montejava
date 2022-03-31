@@ -171,10 +171,10 @@ public class Board {
 		}
 	}
 
-	public boolean surroundedByArrows(int postion) {
+	private boolean surroundedByArrows(int position) {
 		for (int d = 0; d < Direction.COUNT; d++) {
 			int offset = dimensions.getDirectionOffset(d);
-			int adjacent = postion + offset;
+			int adjacent = position + offset;
 			if (!dimensions.outOfBounds(adjacent)) {
 				byte piece = board[adjacent];
 				if (piece != Piece.ARROW) {
