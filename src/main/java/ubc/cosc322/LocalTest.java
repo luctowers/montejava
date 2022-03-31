@@ -7,6 +7,7 @@ import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.RandomMovePlayer;
+import ubc.cosc322.engine.util.IntList;
 
 public class LocalTest {
 	
@@ -19,7 +20,7 @@ public class LocalTest {
 		Player white = new RandomMovePlayer();
 		// Player black = new RandomMovePlayer();
 		// MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.3);
-		MonteCarloPlayer black = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 5000, 0.5);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 8, 1000, 0.3);
 		// MonteCarloPlayer black = new MonteCarloPlayer(() -> new PartialRolloutHeuristic(new RandomMovePlayer(), new MobilityHeuristic(), 90), 4, 1000, 0.3);
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
@@ -29,6 +30,17 @@ public class LocalTest {
 				// System.out.println(white.getStats().whiteWinRatio);
 				System.out.println(black.getStats().whiteWinRatio);
 				System.out.println(black.getStats().evaluations);
+				for (Color color : Color.values()) {
+					System.out.print(color + ":");
+					IntList queens = board.getUntrappedQueens(color);
+					for (int i = 0; i < queens.size(); i++) {
+						int queen = queens.get(i);
+						int chamber = board.getPositionChamber(queen);
+						int chamberSize = board.getChamberSize(chamber);
+						System.out.print(" (" + board.dimensions.x(queen) + "," +  board.dimensions.y(queen) + ")=" + board.getPositionChamber(queen) + "@" + chamberSize);
+					}
+					System.out.println();
+				}
 			});
 			System.out.println("iteration count: " + ITERATION_COUNT);
 

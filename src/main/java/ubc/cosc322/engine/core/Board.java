@@ -14,6 +14,8 @@ public class Board {
 
 	private byte[] board;
 
+	private ChamberAnalyzer chamberAnalyzer;
+
 	private Color colorToMove;
 
 	private MoveType nextMoveType;
@@ -26,7 +28,8 @@ public class Board {
 
 	public Board(Dimensions dimensions) {
 		this.dimensions = dimensions;
-		this.board = new byte[dimensions.arrayWidth*dimensions.arrayHeight];
+		this.board = new byte[dimensions.arraySize];
+		this.chamberAnalyzer = new ChamberAnalyzer(dimensions);
 		this.colorToMove = Color.WHITE;
 		this.nextMoveType = MoveType.QUEEN;
 		this.untrappedQueens = new EnumMap<>(Color.class);
@@ -52,13 +55,14 @@ public class Board {
 
 	private Board(Board other) {
 		this.dimensions = other.dimensions;
-		this.board = other.board.clone();
 		this.colorToMove = other.colorToMove;
 		this.nextMoveType = other.nextMoveType;
 		this.lastQueenSource = other.lastQueenSource;
 		this.lastQueenDestination = other.lastQueenDestination;
 		this.lastArrowMove = other.lastArrowMove;
 		this.moveCount = other.moveCount;
+		this.board = other.board.clone();
+		this.chamberAnalyzer = other.chamberAnalyzer.clone();
 		this.untrappedQueens = new EnumMap<>(Color.class);
 		this.untrappedQueens.put(Color.WHITE, other.untrappedQueens.get(Color.WHITE).clone());
 		this.untrappedQueens.put(Color.BLACK, other.untrappedQueens.get(Color.BLACK).clone());
@@ -70,6 +74,8 @@ public class Board {
 	}
 
 	public void placeArrow(int position) {
+		chamberAnalyzer.placeArrow(position);
+		chamberAnalyzer.update();
 		placePiece(Piece.ARROW, position);
 	}
 
@@ -98,7 +104,7 @@ public class Board {
 				lastQueenDestination = queenDestination;
 				break;
 			case ARROW:
-				board[move] = Piece.ARROW;
+				placeArrow(move);
 				lastArrowMove = move;
 				colorToMove = colorToMove.other();
 				break;
@@ -222,6 +228,14 @@ public class Board {
 
 	public int getMaxMovesAbsolute() {
 		return MAX_QUEENS_PER_COLOR*dimensions.maxTrace;
+	}
+
+	public int getPositionChamber(int position) {
+		return chamberAnalyzer.getPositionChamber(position);
+	}
+
+	public int getChamberSize(int chamber) {
+		return chamberAnalyzer.getChamberSize(chamber);
 	}
 
 	@Override
