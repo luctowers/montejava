@@ -129,7 +129,7 @@ public class COSC322Test extends GamePlayer {
 		}
 		Board board = COSC322Converter.decodeBoardState(msgDetails);
 		System.out.println(board);
-		ai.useState(board);
+		ai.useBoard(board);
 		// reset aiColor in-case it was set in a previous game
 		aiColor = null;
 		timer.stop();
@@ -148,7 +148,7 @@ public class COSC322Test extends GamePlayer {
 		if (userName.equals(blackUsername)) {
 			aiColor = Color.BLACK;
 		}
-		timer.start(ai.getState().getColorToMove());
+		timer.start(ai.getBoard().getColorToMove());
 		makeMove();
 	}
 
@@ -156,11 +156,11 @@ public class COSC322Test extends GamePlayer {
 		if (gamegui != null) {
 			gamegui.updateGameState(msgDetails);
 		}
-		Turn turn = COSC322Converter.decodeTurn(msgDetails, ai.getState().dimensions);
+		Turn turn = COSC322Converter.decodeTurn(msgDetails, ai.getBoard().dimensions);
 		timer.stop();
-		COSC322Validator.validateAndLog(ai.getState(), turn);
+		COSC322Validator.validateAndLog(ai.getBoard(), turn);
 		ai.doTurn(turn);
-		timer.start(ai.getState().getColorToMove());
+		timer.start(ai.getBoard().getColorToMove());
 		logState();
 		logStats(ai.getStats());
 		makeMove();
@@ -168,7 +168,7 @@ public class COSC322Test extends GamePlayer {
 
 	/** makes a move and sends it to the server, if it is our turn */
 	private void makeMove() {
-		if (ai.getState().getColorToMove() != aiColor) {
+		if (ai.getBoard().getColorToMove() != aiColor) {
 			System.out.println("NOT PLAYING MOVE, NOT OUR TURN");
 		} else {
 			System.out.println("OUR ai is currently thinking...");
@@ -179,14 +179,14 @@ public class COSC322Test extends GamePlayer {
 			}
 			logState();
 			logStats(ai.getStats());
-			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getState().dimensions);
+			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getBoard().dimensions);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
 			timer.stop();
 			if (gamegui != null) {
 				gamegui.updateGameState(msgDetails);
 			}
-			timer.start(ai.getState().getColorToMove());
+			timer.start(ai.getBoard().getColorToMove());
 		}
 	}
 
@@ -205,7 +205,7 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging to provide game history to the terminal */
 	private void logState() {
-		Board board = ai.getState();
+		Board board = ai.getBoard();
 		System.out.println(board);
 		if (aiColor == null) {
 			System.out.println("WE ARE SPECTATING");

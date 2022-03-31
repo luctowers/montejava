@@ -1,7 +1,5 @@
 package ubc.cosc322.engine.core;
 
-import java.util.Arrays;
-
 import ubc.cosc322.engine.util.IntList;
 
 public class ChamberAnalyzer {

@@ -23,13 +23,13 @@ public class COSC322Validator {
 		board = board.clone();
 		IntList moves = new IntList(board.getMaxMovesAbsolute());
 		board.generateMoves(moves);
-		if (moves.search(turn.queenMove) == -1) {
+		if (!moves.contains(turn.queenMove)) {
 			return false;
 		}
 		board.doMove(turn.queenMove);
 		moves.clear();
 		board.generateMoves(moves);
-		if (moves.search(turn.arrowMove) == -1) {
+		if (!moves.contains(turn.arrowMove)) {
 			return false;
 		}
 		return true;

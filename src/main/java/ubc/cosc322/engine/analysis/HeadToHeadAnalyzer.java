@@ -36,8 +36,8 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 	public void play(int n) {
 		for (int i = 0; i < n; i++) {
 			Board playState = initialState.clone();
-			whitePlayer.useState(initialState.clone());
-			blackPlayer.useState(initialState.clone());
+			whitePlayer.useBoard(initialState.clone());
+			blackPlayer.useBoard(initialState.clone());
 			while (true) {
 				Player playerToMove, playerToWait;
 				if (playState.getColorToMove() == Color.WHITE) {

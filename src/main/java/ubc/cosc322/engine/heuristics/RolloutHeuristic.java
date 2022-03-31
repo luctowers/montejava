@@ -17,7 +17,7 @@ public class RolloutHeuristic implements Heuristic {
 
 	@Override
 	public int evaluate(Board board) {
-		player.useState(board);
+		player.useBoard(board);
 		do {
 			simulationBuffer.clear();
 			player.suggestAndDoMoves(simulationBuffer.capacity(), simulationBuffer);

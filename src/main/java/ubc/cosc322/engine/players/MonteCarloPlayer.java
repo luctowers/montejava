@@ -33,13 +33,13 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 	}
 
 	@Override
-	public void useState(Board board) {
+	public void useBoard(Board board) {
 		try {
 			close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		super.useState(board);
+		super.useBoard(board);
 		// board.computeChambers();
 		this.root = new Node(board);
 		this.rootStats = new RootStats();

@@ -10,11 +10,11 @@ public abstract class Player {
 	
 	protected Board board;
 
-	public void useState(Board board) {
+	public void useBoard(Board board) {
 		this.board = board;
 	}
 
-	public Board getState() {
+	public Board getBoard() {
 		return board;
 	}
 

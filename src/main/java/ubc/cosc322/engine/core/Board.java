@@ -22,7 +22,8 @@ public class Board {
 
 	private int moveCount;
 
-	private EnumMap<Color,IntList> untrappedQueens;
+	private IntList untrappedBlackQueens;
+	private IntList untrappedWhiteQueens;
 
 	private int lastQueenSource, lastQueenDestination, lastArrowMove;
 
@@ -32,9 +33,8 @@ public class Board {
 		this.chamberAnalyzer = new ChamberAnalyzer(dimensions);
 		this.colorToMove = Color.WHITE;
 		this.nextMoveType = MoveType.QUEEN;
-		this.untrappedQueens = new EnumMap<>(Color.class);
-		this.untrappedQueens.put(Color.WHITE, new IntList(MAX_QUEENS_PER_COLOR));
-		this.untrappedQueens.put(Color.BLACK, new IntList(MAX_QUEENS_PER_COLOR));
+		this.untrappedWhiteQueens = new IntList(MAX_QUEENS_PER_COLOR);
+		this.untrappedBlackQueens = new IntList(MAX_QUEENS_PER_COLOR);
 		this.lastQueenSource = -1;
 		this.lastQueenDestination = -1;
 		this.lastArrowMove = -1;
@@ -63,14 +63,13 @@ public class Board {
 		this.moveCount = other.moveCount;
 		this.board = other.board.clone();
 		this.chamberAnalyzer = other.chamberAnalyzer.clone();
-		this.untrappedQueens = new EnumMap<>(Color.class);
-		this.untrappedQueens.put(Color.WHITE, other.untrappedQueens.get(Color.WHITE).clone());
-		this.untrappedQueens.put(Color.BLACK, other.untrappedQueens.get(Color.BLACK).clone());
+		this.untrappedWhiteQueens = other.untrappedWhiteQueens.clone();
+		this.untrappedBlackQueens = other.untrappedBlackQueens.clone();
 	}
 
 	public void placeQueen(Color color, int position) {
 		placePiece(Piece.queenOfColor(color), position);
-		untrappedQueens.get(color).push(position);
+		getUntrappedQueens(color).push(position);
 	}
 
 	public void placeArrow(int position) {
@@ -125,7 +124,7 @@ public class Board {
 		if (color == null) {
 			return;
 		}
-		IntList positions = untrappedQueens.get(color);
+		IntList positions = getUntrappedQueens(color);
 		for (int i = 0; i < positions.size(); i++) {
 			if (positions.get(i) == oldPosition) {
 				positions.set(i, newPosition);
@@ -139,7 +138,14 @@ public class Board {
 
 	public IntList getUntrappedQueens(Color color) {
 		// TODO: make this return immutable
-		return untrappedQueens.get(color);
+		switch (color) {
+			case WHITE:
+				return untrappedWhiteQueens;
+			case BLACK:
+				return untrappedBlackQueens;
+			default:
+				throw new IllegalArgumentException("invalid color");
+		}
 	}
 
 	public int getMoveCount() {
@@ -193,7 +199,7 @@ public class Board {
 	}
 
 	private void generateQueenMoves(IntList output) {
-		IntList untrappedQueensToMove = untrappedQueens.get(colorToMove);
+		IntList untrappedQueensToMove = getUntrappedQueens(colorToMove);
 		for (int q = untrappedQueensToMove.size() - 1; q >= 0; q--) {
 			int outputBase = output.size();
 			int queen = untrappedQueensToMove.get(q);

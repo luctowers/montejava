@@ -79,6 +79,15 @@ public final class IntList {
 		return -1;
 	}
 
+	public boolean contains(int n) {
+		for (int i = 0; i < size; i++) {
+			if (array[i] == n) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void clear() {
 		size = 0;
 	}
