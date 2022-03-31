@@ -1,7 +1,5 @@
 package ubc.cosc322.engine.core;
 
-import java.util.EnumMap;
-
 import ubc.cosc322.engine.util.ConsoleColors;
 import ubc.cosc322.engine.util.IntList;
 
@@ -22,8 +20,13 @@ public class Board {
 
 	private int moveCount;
 
-	private IntList untrappedBlackQueens;
-	private IntList untrappedWhiteQueens;
+	private IntList blackQueens;
+	private IntList whiteQueens;
+
+	private boolean chambersUpdated;
+	private IntList blackChambers;
+	private IntList whiteChambers;
+	private IntList allChambers;
 
 	private int lastQueenSource, lastQueenDestination, lastArrowMove;
 
@@ -33,8 +36,8 @@ public class Board {
 		this.chamberAnalyzer = new ChamberAnalyzer(dimensions);
 		this.colorToMove = Color.WHITE;
 		this.nextMoveType = MoveType.QUEEN;
-		this.untrappedWhiteQueens = new IntList(MAX_QUEENS_PER_COLOR);
-		this.untrappedBlackQueens = new IntList(MAX_QUEENS_PER_COLOR);
+		this.whiteQueens = new IntList(MAX_QUEENS_PER_COLOR);
+		this.blackQueens = new IntList(MAX_QUEENS_PER_COLOR);
 		this.lastQueenSource = -1;
 		this.lastQueenDestination = -1;
 		this.lastArrowMove = -1;
@@ -63,18 +66,18 @@ public class Board {
 		this.moveCount = other.moveCount;
 		this.board = other.board.clone();
 		this.chamberAnalyzer = other.chamberAnalyzer.clone();
-		this.untrappedWhiteQueens = other.untrappedWhiteQueens.clone();
-		this.untrappedBlackQueens = other.untrappedBlackQueens.clone();
+		this.whiteQueens = other.whiteQueens.clone();
+		this.blackQueens = other.blackQueens.clone();
 	}
 
 	public void placeQueen(Color color, int position) {
 		placePiece(Piece.queenOfColor(color), position);
-		getUntrappedQueens(color).push(position);
+		getQueens(color).push(position);
 	}
 
 	public void placeArrow(int position) {
 		chamberAnalyzer.placeArrow(position);
-		chamberAnalyzer.update();
+		chambersUpdated = false;
 		placePiece(Piece.ARROW, position);
 	}
 
@@ -124,7 +127,7 @@ public class Board {
 		if (color == null) {
 			return;
 		}
-		IntList positions = getUntrappedQueens(color);
+		IntList positions = getQueens(color);
 		for (int i = 0; i < positions.size(); i++) {
 			if (positions.get(i) == oldPosition) {
 				positions.set(i, newPosition);
@@ -136,13 +139,12 @@ public class Board {
 		board[newPosition] = queen;
 	}
 
-	public IntList getUntrappedQueens(Color color) {
-		// TODO: make this return immutable
+	public IntList getQueens(Color color) {
 		switch (color) {
 			case WHITE:
-				return untrappedWhiteQueens;
+				return whiteQueens;
 			case BLACK:
-				return untrappedBlackQueens;
+				return blackQueens;
 			default:
 				throw new IllegalArgumentException("invalid color");
 		}
@@ -198,18 +200,30 @@ public class Board {
 		}
 	}
 
-	private void generateQueenMoves(IntList output) {
-		IntList untrappedQueensToMove = getUntrappedQueens(colorToMove);
-		for (int q = untrappedQueensToMove.size() - 1; q >= 0; q--) {
+	public void generateQueenMoves(IntList output) {
+		IntList queensToMove = getQueens(colorToMove);
+		for (int q = queensToMove.size() - 1; q >= 0; q--) {
 			int outputBase = output.size();
-			int queen = untrappedQueensToMove.get(q);
+			int queen = queensToMove.get(q);
 			traceAll(queen, output);
 			if (output.size() == outputBase && surroundedByArrows(queen)) {
-				untrappedQueensToMove.removeIndex(q);
+				queensToMove.removeIndex(q);
 			}
 			for (int i = outputBase; i < output.size(); i++) {
 				output.set(i, Move.encodeQueenMove(queen, output.get(i)));
 			}
+		}
+	}
+
+	public void generateQueenMoves(IntList output, int position) {
+		int outputBase = output.size();
+		traceAll(position, output);
+		if (output.size() == outputBase && surroundedByArrows(position)) {
+			Color color = Piece.colorOfQueen(board[position]);
+			getQueens(color).removeValue(position);
+		}
+		for (int i = outputBase; i < output.size(); i++) {
+			output.set(i, Move.encodeQueenMove(position, output.get(i)));
 		}
 	}
 
@@ -236,8 +250,63 @@ public class Board {
 		return MAX_QUEENS_PER_COLOR*dimensions.maxTrace;
 	}
 
-	public int getPositionChamber(int position) {
-		return chamberAnalyzer.getPositionChamber(position);
+	public void computeChambers() {
+		if (chambersUpdated) {
+			return;
+		}
+		if (whiteChambers == null) {
+			whiteChambers = new IntList(MAX_QUEENS_PER_COLOR);
+		} else {
+			whiteChambers.clear();
+		}
+		if (blackChambers == null) {
+			blackChambers = new IntList(MAX_QUEENS_PER_COLOR);
+		} else {
+			blackChambers.clear();
+		}
+		if (allChambers == null) {
+			allChambers = new IntList(2*MAX_QUEENS_PER_COLOR);
+		} else {
+			allChambers.clear();
+		}
+		chamberAnalyzer.update();
+		for (int i = 0; i < whiteQueens.size(); i++) {
+			int queen = whiteQueens.get(i);
+			int chamber = chamberAnalyzer.getPositionChamber(queen);
+			whiteChambers.push(chamber);
+			allChambers.push(chamber);
+		}
+		for (int i = 0; i < blackQueens.size(); i++) {
+			int queen = blackQueens.get(i);
+			int chamber = chamberAnalyzer.getPositionChamber(queen);
+			blackChambers.push(chamber);
+			allChambers.push(chamber);
+		}
+		allChambers.sort();
+		chambersUpdated = true;
+	}
+
+	public IntList getWhiteChambers() {
+		return whiteChambers;
+	}
+
+	public IntList getBlackChambers() {
+		return blackChambers;
+	}
+
+	public IntList getQueenChambers(Color color) {
+		switch (color) {
+			case WHITE:
+				return whiteChambers;
+			case BLACK:
+				return blackChambers;
+			default:
+				throw new IllegalArgumentException("invalid color");
+		}
+	}
+
+	public IntList getQueenChambers() {
+		return allChambers;
 	}
 
 	public int getChamberSize(int chamber) {

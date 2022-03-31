@@ -20,7 +20,7 @@ public class MobilityHeuristic implements Heuristic {
 		for (Color color : Color.values()) {
 			// count the positions that can be reached by queens of that color
 			int mobility = 0;
-			IntList queens = board.getUntrappedQueens(color);
+			IntList queens = board.getQueens(color);
 			for (int i = 0; i < queens.size(); i++) {
 				board.traceAll(queens.get(i), traceBuffer);
 				mobility += traceBuffer.size();

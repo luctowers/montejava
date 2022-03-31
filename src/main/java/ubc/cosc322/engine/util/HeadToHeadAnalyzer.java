@@ -1,4 +1,4 @@
-package ubc.cosc322.engine.analysis;
+package ubc.cosc322.engine.util;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

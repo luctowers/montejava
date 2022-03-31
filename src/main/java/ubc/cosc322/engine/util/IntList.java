@@ -94,6 +94,20 @@ public final class IntList {
 		Arrays.sort(array, 0, size);
 	}
 
+	public boolean empty() {
+		return size == 0;
+	}
+
+	public int count(int n) {
+		int count = 0;
+		for (int i = 0; i < size; i++) {
+			if (array[i] == n) {
+				count++;
+			}
+		}
+		return count;
+	}
+
 	public void clear() {
 		size = 0;
 	}

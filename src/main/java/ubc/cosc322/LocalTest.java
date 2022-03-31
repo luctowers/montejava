@@ -1,14 +1,15 @@
 package ubc.cosc322;
 
-import ubc.cosc322.engine.analysis.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.core.Color;
+import ubc.cosc322.engine.generators.ContestedMoveGenerator;
+import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.heuristics.EndgameHeuristic;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.RandomMovePlayer;
+import ubc.cosc322.engine.util.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.util.IntList;
 
 public class LocalTest {
@@ -19,31 +20,39 @@ public class LocalTest {
 
 		Board initialState = new Board(); // standard 10x10 4 queen board
 
-		// Player white = new RandomMovePlayer();
-		// Player black = new RandomMovePlayer();
-		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.3);
-		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer()), 4, 1000, 0.3);
-		// MonteCarloPlayer black = new MonteCarloPlayer(() -> new PartialRolloutHeuristic(new RandomMovePlayer(), new MobilityHeuristic(), 90), 4, 1000, 0.3);
+		// Player white = new RandomMovePlayer(new ContestedMoveGenerator());
+		// Player black = new RandomMovePlayer(new LegalMoveGenerator());
+		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())), () -> new LegalMoveGenerator(), 4, 10000, 0.3);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())), () -> new ContestedMoveGenerator(), 4, 10000, 0.3);
+
+		EndgameHeuristic endgame = new EndgameHeuristic();
 
 		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
 
 			analyzer.onTurn(board -> {
-				Integer.numberOfTrailingZeros(0);
 				System.out.println(board);
 				System.out.println(white.getStats().whiteWinRatio);
 				System.out.println(white.getStats().evaluations);
 				System.out.println(black.getStats().whiteWinRatio);
 				System.out.println(black.getStats().evaluations);
-				for (Color color : Color.values()) {
-					System.out.print(color + ":");
-					IntList queens = board.getUntrappedQueens(color);
-					for (int i = 0; i < queens.size(); i++) {
-						int queen = queens.get(i);
-						int chamber = board.getPositionChamber(queen);
-						int chamberSize = board.getChamberSize(chamber);
-						System.out.print(" (" + board.dimensions.x(queen) + "," +  board.dimensions.y(queen) + ")=" + board.getPositionChamber(queen) + "@" + chamberSize);
-					}
+				board.computeChambers();
+				System.out.print("WHITE:");
+				IntList whiteChambers = board.getWhiteChambers();
+				for (int i = 0; i < whiteChambers.size(); i++) {
+					int chamber = whiteChambers.get(i);
+					int chamberSize = board.getChamberSize(chamber);
+					System.out.print(" " + chamber + "@" + chamberSize);
 				}
+				System.out.println();
+				System.out.print("BLACK:");
+				IntList blackChambers = board.getBlackChambers();
+				for (int i = 0; i < blackChambers.size(); i++) {
+					int chamber = blackChambers.get(i);
+					int chamberSize = board.getChamberSize(chamber);
+					System.out.print(" " + chamber + "@" + chamberSize);
+				}
+				System.out.println();
+				System.out.println("territory: " + endgame.evaluate(board));
 			});
 			System.out.println("iteration count: " + ITERATION_COUNT);
 
