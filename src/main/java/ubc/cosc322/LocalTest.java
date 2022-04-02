@@ -1,13 +1,22 @@
 package ubc.cosc322;
 
 import ubc.cosc322.engine.core.Color;
+import ubc.cosc322.engine.core.Dimensions;
 import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import ubc.cosc322.engine.core.Board;
+import ubc.cosc322.engine.heuristics.DividerHeuristic;
 import ubc.cosc322.engine.heuristics.EndgameHeuristic;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
+import ubc.cosc322.engine.heuristics.SwitchHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
+import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 import ubc.cosc322.engine.util.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.util.IntList;
@@ -18,16 +27,16 @@ public class LocalTest {
 
 		final int ITERATION_COUNT = 1;
 
-		Board initialState = new Board(); // standard 10x10 4 queen board
+		Board initialBoard = new Board(); // standard 10x10 4 queen board
+		// Board initialBoard = loadBoardFromFile(new Dimensions(10, 10), Color.WHITE, "/Users/luctowers/Documents/ubco/cosc322/team-01/scratch/badendgame.txt");
 
-		// Player white = new RandomMovePlayer(new ContestedMoveGenerator());
-		// Player black = new RandomMovePlayer(new LegalMoveGenerator());
-		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())), () -> new LegalMoveGenerator(), 4, 10000, 0.3);
-		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())), () -> new ContestedMoveGenerator(), 4, 10000, 0.3);
+		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())), () -> new LegalMoveGenerator(), 4, 30000, 0.3);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())), () -> new ContestedMoveGenerator(), 4, 30000, 0.3);
 
 		EndgameHeuristic endgame = new EndgameHeuristic();
+		DividerHeuristic divider = new DividerHeuristic();
 
-		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialState, white, black)) {
+		try (HeadToHeadAnalyzer analyzer = new HeadToHeadAnalyzer(initialBoard, white, black)) {
 
 			analyzer.onTurn(board -> {
 				System.out.println(board);
@@ -52,7 +61,8 @@ public class LocalTest {
 					System.out.print(" " + chamber + "@" + chamberSize);
 				}
 				System.out.println();
-				System.out.println("territory: " + endgame.evaluate(board));
+				System.out.println("endgame=" + endgame.evaluate(board));
+				System.out.println("divider=" + divider.evaluate(board));
 			});
 			System.out.println("iteration count: " + ITERATION_COUNT);
 
@@ -71,6 +81,15 @@ public class LocalTest {
 			e.printStackTrace();
 		}
 
+	}
+
+	public static Board loadBoardFromFile(Dimensions dimensions, Color color, String filepath) {
+		try {
+			return new Board(dimensions, color, new String(Files.readAllBytes(Paths.get(filepath))));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

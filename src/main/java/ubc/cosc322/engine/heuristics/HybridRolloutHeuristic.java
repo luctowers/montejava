@@ -21,12 +21,12 @@ public class HybridRolloutHeuristic implements Heuristic {
 	public int evaluate(Board board) {
 		player.useBoard(board);
 		do {
-			simulationBuffer.clear();
-			player.suggestAndDoMoves(simulationBuffer.capacity(), simulationBuffer);
 			int endgameEvaluation = endgame.evaluate(board);
 			if (endgameEvaluation != 0) {
 				return endgameEvaluation;
 			}
+			simulationBuffer.clear();
+			player.suggestAndDoMoves(simulationBuffer.capacity(), simulationBuffer);
 		} while (simulationBuffer.size() != 0);
 		if (board.getColorToMove() == Color.WHITE) {
 			return -1;

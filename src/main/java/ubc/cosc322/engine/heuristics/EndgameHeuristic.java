@@ -31,12 +31,12 @@ public class EndgameHeuristic implements Heuristic {
 				if (blackChambers.contains(currentChamber)) {
 					territory -= chamberSize;
 				}
-				if (count <= chamberSize) {
+				if (count < chamberSize) {
 					if (whiteChambers.contains(currentChamber) && blackChambers.contains(currentChamber)) {
 						return 0;
 					}
 				}
-				count = 0;
+				count = 1;
 				if (i < allChambers.size()) {
 					currentChamber = allChambers.get(i);
 				}

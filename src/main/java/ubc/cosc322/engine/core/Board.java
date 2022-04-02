@@ -404,4 +404,36 @@ public class Board {
 		return builder.toString();
 	}
 
+	public Board(Dimensions dimensions, Color colorToMove, String boardString) {
+		this(dimensions);
+		this.colorToMove = colorToMove;
+		boolean nextCharCouldBePiece = false;
+		int x = 0;
+		int y = dimensions.boardHeight - 1;
+		for (int i = 0; i < boardString.length(); i++){
+			char character = boardString.charAt(i);
+			if (nextCharCouldBePiece) {
+				nextCharCouldBePiece = false;
+				if (character == 'W') {
+					placeQueen(Color.WHITE, dimensions.position(x, y));
+				} else if (character == 'B') {
+					placeQueen(Color.BLACK, dimensions.position(x, y));
+				} else if (character == '*') {
+					placeArrow(dimensions.position(x, y));
+				} else if (character != ' ') {
+					x--;
+				}
+				x++;
+			} else if (character == ' ') {
+				nextCharCouldBePiece = true;
+			}
+			if (character == '\n') {
+				if (x != 0) {
+					y--;
+				}
+				x = 0;
+			}
+		}
+	}
+
 }
