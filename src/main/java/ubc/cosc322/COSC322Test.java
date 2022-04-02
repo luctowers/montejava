@@ -10,6 +10,7 @@ import java.util.Random;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
+import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
@@ -87,9 +88,9 @@ public class COSC322Test extends GamePlayer {
 		// 28sec < 30sec deadline
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
-			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())),
-			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 5000, 0.3
+			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
+			() -> new ContestedMoveGenerator(),
+			Runtime.getRuntime().availableProcessors(), 28000, 0.3
 		);
 	}
 
