@@ -22,7 +22,7 @@ public class MobilityHeuristic implements Heuristic {
 			int mobility = 0;
 			IntList queens = board.getQueens(color);
 			for (int i = 0; i < queens.size(); i++) {
-				board.traceAll(queens.get(i), traceBuffer);
+				board.trace(queens.get(i), traceBuffer);
 				mobility += traceBuffer.size();
 				traceBuffer.clear();
 			}

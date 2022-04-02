@@ -13,7 +13,7 @@ public class HybridRolloutHeuristic implements Heuristic {
 
 	public HybridRolloutHeuristic(Player player) {
 		this.player = player;
-		this.simulationBuffer = new IntList(2);
+		this.simulationBuffer = new IntList(4);
 		this.endgame = new EndgameHeuristic();
 	}
 

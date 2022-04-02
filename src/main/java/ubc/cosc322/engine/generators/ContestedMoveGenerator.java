@@ -51,7 +51,7 @@ public class ContestedMoveGenerator implements MoveGenerator {
 
 			for (int i = 0; i < contestedQueens.size(); i++) {
 				int queen = contestedQueens.get(i);
-				board.generateQueenMoves(output, queen);
+				board.generateQueenMoves(queen, output);
 			}
 
 		}
@@ -74,7 +74,7 @@ public class ContestedMoveGenerator implements MoveGenerator {
 				int queen = friendlyQueens.get(i);
 				int chamber = friendlyChambers.get(i);
 				if (chamber == smallestChamber) {
-					board.generateQueenMoves(output, queen);
+					board.generateQueenMoves(queen, output);
 				}
 			}
 
