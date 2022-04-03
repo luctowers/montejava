@@ -4,7 +4,10 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.util.IntList;
 
-/** A fast heuristic based of the mobility of a color's queens. */
+/**
+ * A fast heuristic based of the mobility of a color's queens.
+ * While fast, this heuristic is pretty terrible.
+ **/
 public class MobilityHeuristic implements Heuristic {
 
 	IntList traceBuffer;

@@ -6,7 +6,6 @@ import ubc.cosc322.engine.core.Board;
 public class NullHeuristic implements Heuristic {
 
 	@Override
-	/** Always returns zero. */
 	public int evaluate(Board board) {
 		return 0;
 	}

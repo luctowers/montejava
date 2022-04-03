@@ -5,11 +5,15 @@ import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.util.IntList;
 
+/**
+ * A modified rollout heuristic that detects and returns an endgame heuristic
+ * once an endgame is reached.
+ */
 public class HybridRolloutHeuristic implements Heuristic {
 
 	private Player player;
-	IntList simulationBuffer;
-	EndgameHeuristic endgame;
+	private IntList simulationBuffer;
+	private EndgameHeuristic endgame;
 
 	public HybridRolloutHeuristic(Player player) {
 		this.player = player;

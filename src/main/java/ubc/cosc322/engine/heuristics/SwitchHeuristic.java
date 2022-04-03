@@ -2,6 +2,7 @@ package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Board;
 
+/** A heurstic that switches between two other heuristics after n moves. */
 public class SwitchHeuristic implements Heuristic {
 
 	private Heuristic h1, h2;

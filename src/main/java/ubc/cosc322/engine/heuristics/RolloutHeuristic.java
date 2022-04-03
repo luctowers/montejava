@@ -5,6 +5,12 @@ import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.util.IntList;
 
+/**
+ * An heuristic that performs full rollouts the end state of a game.
+ * This is generally a good heuristic, but gets pretty delusional in some end
+ * games. This is because naive rollout players will vlaue open areas over long
+ * winding pathways, despite greater territory.
+ **/
 public class RolloutHeuristic implements Heuristic {
 
 	private Player player;
@@ -12,7 +18,7 @@ public class RolloutHeuristic implements Heuristic {
 
 	public RolloutHeuristic(Player player) {
 		this.player = player;
-		this.simulationBuffer = new IntList(300);
+		this.simulationBuffer = new IntList(200);
 	}
 
 	@Override
