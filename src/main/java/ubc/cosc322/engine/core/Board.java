@@ -330,17 +330,19 @@ public class Board {
 		chambersUpdated = true;
 	}
 
-	/**  */
+	/** Gets all the chambers that white queens reside in. */
 	public IntList getWhiteChambers() {
 		// TODO: make this return immutable
 		return whiteChambers;
 	}
 
+	/** Gets all the chambers that black queens reside in. */
 	public IntList getBlackChambers() {
 		// TODO: make this return immutable
 		return blackChambers;
 	}
 
+	/** Gets all the chambers that queens of a color queens reside in. */
 	public IntList getQueenChambers(Color color) {
 		// TODO: make this return immutable
 		switch (color) {
@@ -353,20 +355,24 @@ public class Board {
 		}
 	}
 
+	/** Gets all the chambers that queens reside in. */
 	public IntList getQueenChambers() {
 		return allChambers;
 	}
 
+	/** Gets the size of a chamber in board spaces. */
 	public int getChamberSize(int chamber) {
 		return chamberAnalyzer.getChamberSize(chamber);
 	}
 
+	/** copy the board state. */
 	@Override
 	public Board clone()
     {
 		return new Board(this);
     }
 
+	/** Convert the board to a multine line human-readable format. */
 	@Override
 	public String toString() { 
 		StringBuilder builder = new StringBuilder();
@@ -439,7 +445,7 @@ public class Board {
 		return builder.toString();
 	}
 
-	/** Helper function for board toString. */
+	// helper function for board toString
 	private String horiztonalLine() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 4*dimensions.boardWidth+1; i++) {
@@ -452,6 +458,7 @@ public class Board {
 		return builder.toString();
 	}
 
+	/** A hacky way to load strings as boards for testing. */
 	public Board(Dimensions dimensions, Color colorToMove, String boardString) {
 		this(dimensions);
 		this.colorToMove = colorToMove;

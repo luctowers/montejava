@@ -89,8 +89,8 @@ public class COSC322Test extends GamePlayer {
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
 			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
-			() -> new ContestedMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 28000, 0.3
+			() -> new LegalMoveGenerator(),
+			Runtime.getRuntime().availableProcessors(), 5000, 0.3
 		);
 	}
 
