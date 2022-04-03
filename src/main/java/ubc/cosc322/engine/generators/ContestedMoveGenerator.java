@@ -5,6 +5,13 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.util.IntList;
 
+/**
+ * An experimental move generator that moves queen in contested chambers
+ * (chambers that have enemy queens) before it moves queens in uncontested
+ * chambers. Note: this is sometimes a bad deicision, sometimes it is critical
+ * for a queen in a contested chamber to NOT make a move. While this situation
+ * is uncommon, it can't be ignored.
+ */
 public class ContestedMoveGenerator implements MoveGenerator {
 
 	private IntList contestedQueens;
