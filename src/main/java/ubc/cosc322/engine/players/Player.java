@@ -10,29 +10,34 @@ public abstract class Player {
 	
 	protected Board board;
 
+	/** Tells the player which baord object it will be using. */
 	public void useBoard(Board board) {
 		this.board = board;
 	}
 
+	/** Gets the board object back. */
 	public Board getBoard() {
 		return board;
 	}
 
+	/** Performs a turn from an opponent or external source. */
 	public void doTurn(Turn turn) {
 		board.doTurn(turn);
 	}
 
+	/** Performs a move from an opponent or external source. */
 	public void doMove(int move) {
 		board.doMove(move);
 	}
 
+	/** Performs and outputs up to a certain number of moves. */
 	public abstract void suggestAndDoMoves(int maxMoves, IntList output);
 
+	/** Performs and outputs exactly one turn. */
 	public Turn suggestAndDoTurn() {
-		// DEBUG ASSERTION
-		// if (board.getNextMoveType() != MoveType.PICK_QUEEN) {
-		// 	throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
-		// }
+		if (board.getNextMoveType() != MoveType.QUEEN) {
+			throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
+		}
 		IntList moves = new IntList(MoveType.COUNT);
 		int lastSize = 0;
 		while (moves.size() != MoveType.COUNT) {

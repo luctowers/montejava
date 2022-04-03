@@ -5,6 +5,7 @@ import java.util.Random;
 import ubc.cosc322.engine.generators.MoveGenerator;
 import ubc.cosc322.engine.util.IntList;
 
+/** A player that uses random generator to pick randomly between moves. */
 public class RandomMovePlayer extends Player {
 	
 	private MoveGenerator moveGenerator;
