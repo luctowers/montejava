@@ -3,6 +3,12 @@ package ubc.cosc322.engine.heuristics;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.util.IntList;
 
+/**
+ * An experimental heuristic that return 0 zero if the position is not an
+ * endgame. And returns a territory score if it is an endgame. While not
+ * completely accurate, because some positions in chambers may be mutually 
+ * exclusive to reach. It has proven to be very practical.
+ */
 public class EndgameHeuristic implements Heuristic {
 
 	@Override

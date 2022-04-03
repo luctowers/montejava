@@ -3,6 +3,11 @@ package ubc.cosc322.engine.heuristics;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.util.IntList;
 
+/**
+ * An experimental heuristic that divides of the territory in chambers by the
+ * number of queens that reside in them. While fast, this is a pretty bad
+ * heuristic. It can detect when queen is trapped early game though.
+ */
 public class DividerHeuristic implements Heuristic {
 
 	@Override
