@@ -60,7 +60,7 @@ public class HeadToHeadAnalyzer implements AutoCloseable {
 			for (Consumer<Board> callback : endCallbacks) {
 				callback.accept(playState);
 			}
-			Color winner = playState.getColorToMove().other();
+			Color winner = playState.getColorToMove().opposite();
 			winCounts.put(
 				winner,
 				Integer.valueOf(

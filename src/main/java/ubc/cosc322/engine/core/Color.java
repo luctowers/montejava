@@ -5,10 +5,8 @@ public enum Color {
 
 	WHITE, BLACK;
 
-	/** Inverts the color. WHITE -> BLACK, BLACK -> WHITE
-	 * @return The opposite color.
-	 */
-	public Color other() {
+	/** Inverts the color. WHITE -> BLACK, BLACK -> WHITE */
+	public Color opposite() {
 		switch (this) {
 			case WHITE:
 				return BLACK;

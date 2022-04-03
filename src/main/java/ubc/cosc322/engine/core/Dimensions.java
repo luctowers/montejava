@@ -1,5 +1,6 @@
 package ubc.cosc322.engine.core;
 
+/** A class to help with math related to positions on the board. */
 public final class Dimensions {
 
 	/** The total numbers spaces on the board. */
@@ -23,15 +24,23 @@ public final class Dimensions {
 	/** The maximum number of positions that can be reached orthogonally and diagonally from a position */
 	public final int maxTrace;
 
-	/** Array of direction offsets for  */
+	/** Array of direction offsets for. */
 	private final int[] directionOffsets;
 
+
+	/** Creates a dimensions object with given axis. */
 	public Dimensions(int boardWidth, int boardHeight) {
 		if (boardWidth < 4) {
-			throw new IllegalArgumentException("board width must me greater than four");
+			throw new IllegalArgumentException("board width must be greater than four");
 		}
 		if (boardHeight < 4) {
-			throw new IllegalArgumentException("board height must me greater than four");
+			throw new IllegalArgumentException("board height must be greater than four");
+		}
+		if (boardWidth > 32) {
+			throw new IllegalArgumentException("board width must me less than four");
+		}
+		if (boardHeight > 32) {
+			throw new IllegalArgumentException("board height must me less than four");
 		}
 		this.boardSize = boardWidth * boardHeight;
 		this.boardWidth = boardWidth;
@@ -59,22 +68,27 @@ public final class Dimensions {
 		}
 	}
 
+	/** Converts an integer position to an x coordinate. */
 	public int x(int position) {
 		return position & arrayWidthMask;
 	}
 
+	/** Converts an integer position to a y coordinate. */
 	public int y(int position) {
 		return position >> arrayHeightShift;
 	}
 
+	/** Converts x and y coordinates to an integer position. */
 	public int position(int x, int y) {
 		return x + y * arrayWidth;
 	}
 
+	/** Determines whether an integer position is within the board. */
 	public boolean outOfBounds(int position) {
 		return position < 0 || position >= arraySize || x(position) >= boardWidth;
 	}
 
+	/** Gets one of the 8 offsets than can be added to an integer position. */
 	public int getDirectionOffset(int index) {
 		return directionOffsets[index];
 	}

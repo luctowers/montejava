@@ -32,7 +32,7 @@ public class ContestedMoveGenerator implements MoveGenerator {
 		Color color = board.getColorToMove();
 		IntList friendlyQueens = board.getQueens(color);
 		IntList friendlyChambers = board.getQueenChambers(color);
-		IntList enemyChambers = board.getQueenChambers(color.other());
+		IntList enemyChambers = board.getQueenChambers(color.opposite());
 		IntList allChambers = board.getQueenChambers();
 		for (int i = 0; i < friendlyChambers.size(); i++) {
 			int chamber = friendlyChambers.get(i);

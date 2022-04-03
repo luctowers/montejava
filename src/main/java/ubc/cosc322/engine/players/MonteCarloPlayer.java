@@ -192,7 +192,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			if (selectedChild == -1) {
 
 				// terminal board
-				winner = searchState.getColorToMove().other();
+				winner = searchState.getColorToMove().opposite();
 
 				// DEBUG ASSERTION
 				// check for bad terminal boards

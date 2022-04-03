@@ -130,7 +130,7 @@ public class Board {
 			case ARROW:
 				placeArrow(move);
 				lastArrowMove = move;
-				colorToMove = colorToMove.other();
+				colorToMove = colorToMove.opposite();
 				break;
 			default:
 				throw new IllegalArgumentException("Illegal move type");
