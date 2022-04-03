@@ -11,6 +11,7 @@ import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.players.Player;
 
+/** Pits two Players against eachother offline. */
 public class HeadToHeadAnalyzer implements AutoCloseable {
 
 	Board initialState;

@@ -9,7 +9,7 @@ public enum Direction {
 	/** Coordinate offsets. One of (-1, 0, 1). */
 	public final int x, y;
 
-	/** The number of directions */
+	/** The number of directions. */
 	public static final int COUNT = 8;
 
 	private Direction(int x, int y) {

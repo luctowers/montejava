@@ -407,7 +407,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			for (Thread thread : workerThreads) {
 				thread.join();
 			}
-			workerThreads = null;
+			workerThreads.clear();
 		}
 	}
 	

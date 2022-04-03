@@ -11,7 +11,7 @@ import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
-/** provides utility functions to convert between the server/client formats and our engine's formats */
+/** Provides utility functions to convert between the server/client formats and our engine's formats. */
 public class COSC322Converter {
 	
 	/** decodes the servers board board format and converts it to our format */

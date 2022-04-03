@@ -14,13 +14,12 @@ import ubc.cosc322.engine.heuristics.DividerHeuristic;
 import ubc.cosc322.engine.heuristics.EndgameHeuristic;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
-import ubc.cosc322.engine.heuristics.SwitchHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.Player;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 import ubc.cosc322.engine.util.HeadToHeadAnalyzer;
 import ubc.cosc322.engine.util.IntList;
 
+/** Used for offline local testing. */
 public class LocalTest {
 	
 	public static void main(String[] args) {
@@ -30,8 +29,8 @@ public class LocalTest {
 		Board initialBoard = new Board(); // standard 10x10 4 queen board
 		// Board initialBoard = loadBoardFromFile(new Dimensions(10, 10), Color.BLACK, "/Users/luctowers/Documents/ubco/cosc322/team-01/scratch/game.txt");
 
-		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())), () -> new LegalMoveGenerator(), 4, 30000, 0.3);
-		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())), () -> new LegalMoveGenerator(), 4, 30000, 0.3);
+		MonteCarloPlayer white = new MonteCarloPlayer(() -> new RolloutHeuristic(new RandomMovePlayer(new LegalMoveGenerator())), () -> new LegalMoveGenerator(), 4, 5000, 0.3);
+		MonteCarloPlayer black = new MonteCarloPlayer(() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())), () -> new LegalMoveGenerator(), 4, 5000, 0.3);
 
 		EndgameHeuristic endgame = new EndgameHeuristic();
 		DividerHeuristic divider = new DividerHeuristic();

@@ -2,6 +2,7 @@ package ubc.cosc322.engine.util;
 
 import java.util.Arrays;
 
+/** A class very similar to ArrayList<Integer>, but without all the needless allocations. */
 public final class IntList {
 	
 	private int[] array;

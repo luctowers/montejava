@@ -13,7 +13,6 @@ import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
-import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.RandomMovePlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -22,6 +21,7 @@ import ygraph.ai.smartfox.games.GameMessage;
 import ygraph.ai.smartfox.games.GamePlayer;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
+/** An adapter between the profs game server/client and our engine. */
 public class COSC322Test extends GamePlayer {
 
 	COSC322Timer timer;
@@ -90,7 +90,7 @@ public class COSC322Test extends GamePlayer {
 		this.ai = new MonteCarloPlayer(
 			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 5000, 0.3
+			Runtime.getRuntime().availableProcessors(), 28000, 0.3
 		);
 	}
 
