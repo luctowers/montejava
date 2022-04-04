@@ -1,7 +1,7 @@
 package ubc.cosc322.engine.analysis;
 
 import ubc.cosc322.engine.core.Dimensions;
-import ubc.cosc322.engine.data.IntList;
+import ubc.cosc322.engine.util.IntList;
 
 /**
  * This class is an efficient way to detect whether one position on the board

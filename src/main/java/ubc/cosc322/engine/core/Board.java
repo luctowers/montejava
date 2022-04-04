@@ -1,8 +1,8 @@
 package ubc.cosc322.engine.core;
 
 import ubc.cosc322.engine.analysis.ChamberAnalyzer;
-import ubc.cosc322.engine.data.IntList;
 import ubc.cosc322.engine.util.ConsoleColors;
+import ubc.cosc322.engine.util.IntList;
 
 /** A mutable board state for the game of amazons. */
 public class Board {

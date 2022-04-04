@@ -1,4 +1,4 @@
-package ubc.cosc322.engine.data;
+package ubc.cosc322.engine.util;
 
 import java.util.Arrays;
 

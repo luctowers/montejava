@@ -3,7 +3,7 @@ package ubc.cosc322.engine.players;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.data.IntList;
+import ubc.cosc322.engine.util.IntList;
 
 /** An interface that abstracts a Game of Amazons player. */
 public abstract class Player {

@@ -1,9 +1,9 @@
 package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.data.IntList;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.players.Player;
+import ubc.cosc322.engine.util.IntList;
 
 /**
  * An heuristic that performs full rollouts the end state of a game.

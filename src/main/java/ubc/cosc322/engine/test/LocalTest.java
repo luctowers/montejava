@@ -1,8 +1,7 @@
-package ubc.cosc322.engine.util;
+package ubc.cosc322.engine.test;
 
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Dimensions;
-import ubc.cosc322.engine.data.IntList;
 import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 
@@ -17,6 +16,7 @@ import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.RandomMovePlayer;
+import ubc.cosc322.engine.util.IntList;
 
 /** Used for offline local testing. */
 public class LocalTest {

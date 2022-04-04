@@ -8,9 +8,9 @@ import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.MoveType;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.data.IntList;
 import ubc.cosc322.engine.generators.MoveGenerator;
 import ubc.cosc322.engine.heuristics.Heuristic;
+import ubc.cosc322.engine.util.IntList;
 
 /** A player that uses a lockless multi-threaded Monte Carlo Tree Search. */
 public class MonteCarloPlayer extends Player implements AutoCloseable {
