@@ -3,7 +3,7 @@ package ubc.cosc322.engine.generators;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.MoveType;
-import ubc.cosc322.engine.util.IntList;
+import ubc.cosc322.engine.data.IntList;
 
 /**
  * An experimental move generator that moves queen in contested chambers

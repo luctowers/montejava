@@ -1,7 +1,7 @@
 package ubc.cosc322.engine.heuristics;
 
 import ubc.cosc322.engine.core.Board;
-import ubc.cosc322.engine.util.IntList;
+import ubc.cosc322.engine.data.IntList;
 
 /**
  * An experimental heuristic that divides of the territory in chambers by the

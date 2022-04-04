@@ -1,7 +1,7 @@
 package ubc.cosc322;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.util.IntList;
+import ubc.cosc322.engine.data.IntList;
 
 public class COSC322Validator {
 	
