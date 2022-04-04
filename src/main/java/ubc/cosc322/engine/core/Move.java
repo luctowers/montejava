@@ -1,38 +1,26 @@
 package ubc.cosc322.engine.core;
 
-/** A single move in the Game of Amazons. */
+/** 
+ * Move are represented by integers, so this class is not constructable.
+ * But it contains methods to decode/encode move information.
+ **/
 public class Move {
-	
-	/** The move type. One of QUEEN or ARROW */
-	public final MoveType type;
 
-	/** The positions involved in a move.
-	 * For QUEEN moves, source is the orignal queen position and destination is 
-	 * the new queen position.
-	 * For ARROW moves, source is the queen shooting the arrow and destination
-	 * is the arrow's location.
-	 */
-	public final Position source, destination;
+	private Move() {}
 
-	public Move(MoveType type, Position source, Position destination) {
-		this.type = type;
-		this.source = source;
-		this.destination = destination;
+	/** Packs two positions into single int for the queen move. */
+	public static int encodeQueenMove(int queenSource, int queenDestination) {
+		return (queenDestination << 16) | queenSource;
 	}
 
-	public boolean equals(Move other) {
-        return source.equals(other.source) && destination.equals(other.destination) && type == other.type;
-    }
+	/** Unpacks the queen source from a queen move. */
+	public static int decodeQueenSource(int queenMove) {
+		return queenMove & 0xFFFF;
+	}
 
-	@Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof Move)) {
-            return false;
-        }
-        return equals((Move) other);
-    }
+	/** Unpacks the queen destination from a queen move. */
+	public static int decodeQueenDestination(int queenMove) {
+		return queenMove >> 16;
+	}
 
 }

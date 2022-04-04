@@ -1,33 +1,57 @@
 package ubc.cosc322.engine.players;
 
-import ubc.cosc322.engine.core.Move;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.MoveType;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
+import ubc.cosc322.engine.util.IntList;
 
 /** An interface that abstracts a Game of Amazons player. */
 public abstract class Player {
 	
-	protected State state;
+	protected Board board;
 
-	public void useState(State state) {
-		this.state = state;
+	/** Tells the player which baord object it will be using. */
+	public void useBoard(Board board) {
+		this.board = board;
 	}
 
-	public State getState() {
-		return state;
+	/** Gets the board object back. */
+	public Board getBoard() {
+		return board;
 	}
 
-	public void doMove(Move move) {
-		state.doMove(move);
-	}
-
+	/** Performs a turn from an opponent or external source. */
 	public void doTurn(Turn turn) {
-		doMove(turn.queenMove());
-		doMove(turn.arrowMove());
+		board.doTurn(turn);
 	}
 
-	public abstract Move suggestMove();
+	/** Performs a move from an opponent or external source. */
+	public void doMove(int move) {
+		board.doMove(move);
+	}
 
-	public abstract Turn suggestTurn();
+	/** Performs and outputs up to a certain number of moves. */
+	public abstract void suggestAndDoMoves(int maxMoves, IntList output);
+
+	/** Performs and outputs exactly one turn. */
+	public Turn suggestAndDoTurn() {
+		if (board.getNextMoveType() != MoveType.QUEEN) {
+			throw new IllegalStateException("when suggesting a turn, it must be the start of a turn");
+		}
+		IntList moves = new IntList(MoveType.COUNT);
+		int lastSize = 0;
+		while (moves.size() != MoveType.COUNT) {
+			suggestAndDoMoves(MoveType.COUNT - lastSize, moves);
+			int received = moves.size() - lastSize;
+			if (received == 0) {
+				return null;
+			}
+			lastSize = moves.size();
+		}
+		return new Turn(
+			moves.get(0),
+			moves.get(1)
+		);
+	}
 
 }

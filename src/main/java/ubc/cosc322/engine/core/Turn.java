@@ -3,38 +3,34 @@ package ubc.cosc322.engine.core;
 /** A single turn in the Game of Amazons. A turn has two moves, a queen move and an arrow move. */
 public class Turn {
 	
-	/** The positions involved in a turn.
-	 * Each positional must be orthogonal or diagonal to the preceding position.
-	 */
-	public final Position queenSource, queenDestination, arrowDestination;
+	/** The two moves of a turn. */
+	public final int queenMove, arrowMove;
 
-	public Turn(Position queenSource, Position queenDestination, Position arrowDestination) {
-		this.queenSource = queenSource;
-		this.queenDestination = queenDestination;
-		this.arrowDestination = arrowDestination;
+	/** Construct a turn directly from the two moves. */
+	public Turn(int queenMove, int arrowMove) {
+		this.queenMove = queenMove;
+		this.arrowMove = arrowMove;
 	}
 
-	public Turn(Move queenMove, Move arrowMove) {
-		if (queenMove.type != MoveType.QUEEN) {
-			throw new IllegalArgumentException("the first move in a turn must be a queen move");
-		}
-		if (arrowMove.type != MoveType.ARROW) {
-			throw new IllegalArgumentException("the second move in a turn must be a arrow move");
-		}
-		if (!queenMove.destination.equals(arrowMove.source)) {
-			throw new IllegalArgumentException("arrow move source must be equal to queen destination");
-		}
-		this.queenSource = queenMove.source;
-		this.queenDestination = queenMove.destination;
-		this.arrowDestination = arrowMove.destination;
+	/** Construct a turn from a triplet of positions. */
+	public Turn(int queenSource, int queenDestination, int arrowMove) {
+		this.queenMove = Move.encodeQueenMove(queenSource, queenDestination);
+		this.arrowMove = arrowMove;
 	}
 
-	public Move queenMove() {
-		return new Move(MoveType.QUEEN, queenSource, queenDestination);
+	/** Gets the position the queen is moving from. */
+	public int getQueenSource() {
+		return Move.decodeQueenSource(queenMove);
 	}
 
-	public Move arrowMove() {
-		return new Move(MoveType.ARROW, queenDestination, arrowDestination);
+	/** Gets the position the queen is moving to. */
+	public int getQueenDestination() {
+		return Move.decodeQueenDestination(queenMove);
+	}
+
+	/** Gets the position of the arriw being shot. */
+	public int getArrowDestination() {
+		return arrowMove;
 	}
 
 }

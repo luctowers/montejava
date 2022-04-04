@@ -1,18 +1,12 @@
 package ubc.cosc322;
-
-import java.util.List;
-
-import ubc.cosc322.engine.core.Move;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
-import ubc.cosc322.engine.generators.LegalMoveGenerator;
+import ubc.cosc322.engine.util.IntList;
 
 public class COSC322Validator {
-
-	private static LegalMoveGenerator generator = new LegalMoveGenerator();
 	
-	public static boolean validateAndLog(State state, Turn turn) {
-		boolean result = validate(state, turn);
+	public static boolean validateAndLog(Board board, Turn turn) {
+		boolean result = validate(board, turn);
 		if (result) {
 			System.out.println("RECEIVED MOVE IS VALID");
 		} else {
@@ -25,15 +19,17 @@ public class COSC322Validator {
 		return result;
 	}
 
-	public static boolean validate(State state, Turn turn) {
-		state = state.clone();
-		List<Move> moves = generator.generateMoves(state);
-		if (!moves.contains(turn.queenMove())) {
+	public static boolean validate(Board board, Turn turn) {
+		board = board.clone();
+		IntList moves = new IntList(board.getMaxMovesAbsolute());
+		board.generateMoves(moves);
+		if (!moves.contains(turn.queenMove)) {
 			return false;
 		}
-		state.doMove(turn.queenMove());
-		moves = generator.generateMoves(state);
-		if (!moves.contains(turn.arrowMove())) {
+		board.doMove(turn.queenMove);
+		moves.clear();
+		board.generateMoves(moves);
+		if (!moves.contains(turn.arrowMove)) {
 			return false;
 		}
 		return true;

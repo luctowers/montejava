@@ -1,4 +1,5 @@
 target/
+scratch/
 .vscode
 .DS_Store
 *.jar

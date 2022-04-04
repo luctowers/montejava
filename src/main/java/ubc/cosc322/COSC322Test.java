@@ -8,17 +8,20 @@ import java.util.Map;
 import java.util.Random;
 
 import ubc.cosc322.engine.core.Color;
-import ubc.cosc322.engine.core.State;
+import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
+import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
+import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.UniformRandomPlayer;
+import ubc.cosc322.engine.players.RandomMovePlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GameMessage;
 import ygraph.ai.smartfox.games.GamePlayer;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
+/** An adapter between the profs game server/client and our engine. */
 public class COSC322Test extends GamePlayer {
 
 	COSC322Timer timer;
@@ -82,12 +85,12 @@ public class COSC322Test extends GamePlayer {
 		// create the monte carlo ai
 		// uniform random rollout player
 		// availableProcessors returns the number of cores in the system
-		// 14000ms = 14sec per half-turn 28sec < 30sec deadline
-		// 0.3 exploration factor 
+		// 28sec < 30sec deadline
+		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
-			new LegalMoveGenerator(),
-			() -> new UniformRandomPlayer(new LegalMoveGenerator()),
-			Runtime.getRuntime().availableProcessors(), 14000, 0.3
+			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
+			() -> new LegalMoveGenerator(),
+			Runtime.getRuntime().availableProcessors(), 28000, 0.3
 		);
 	}
 
@@ -128,9 +131,9 @@ public class COSC322Test extends GamePlayer {
 		if (gamegui != null) {
 			gamegui.setGameState((ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE));
 		}
-		State state = COSC322Converter.decodeBoardState(msgDetails);
-		System.out.println(state);
-		ai.useState(state);
+		Board board = COSC322Converter.decodeBoardState(msgDetails);
+		System.out.println(board);
+		ai.useBoard(board);
 		// reset aiColor in-case it was set in a previous game
 		aiColor = null;
 		timer.stop();
@@ -149,7 +152,7 @@ public class COSC322Test extends GamePlayer {
 		if (userName.equals(blackUsername)) {
 			aiColor = Color.BLACK;
 		}
-		timer.start(ai.getState().getColorToMove());
+		timer.start(ai.getBoard().getColorToMove());
 		makeMove();
 	}
 
@@ -157,40 +160,37 @@ public class COSC322Test extends GamePlayer {
 		if (gamegui != null) {
 			gamegui.updateGameState(msgDetails);
 		}
-		Turn turn = COSC322Converter.decodeTurn(msgDetails);
-		MonteCarloPlayer.Stats stats = ai.getStats();
+		Turn turn = COSC322Converter.decodeTurn(msgDetails, ai.getBoard().dimensions);
 		timer.stop();
-		COSC322Validator.validateAndLog(ai.getState(), turn);
+		COSC322Validator.validateAndLog(ai.getBoard(), turn);
 		ai.doTurn(turn);
-		timer.start(ai.getState().getColorToMove());
+		timer.start(ai.getBoard().getColorToMove());
 		logState();
-		logStats(stats);
+		logStats(ai.getStats());
 		makeMove();
 	}
 
 	/** makes a move and sends it to the server, if it is our turn */
 	private void makeMove() {
-		if (ai.getState().getColorToMove() != aiColor) {
+		if (ai.getBoard().getColorToMove() != aiColor) {
 			System.out.println("NOT PLAYING MOVE, NOT OUR TURN");
 		} else {
 			System.out.println("OUR ai is currently thinking...");
-			Turn turn = ai.suggestTurn();
+			Turn turn = ai.suggestAndDoTurn();
 			if (turn == null) {
 				System.out.println("OUR ai thinks it has LOST");
 				return;
 			}
-			MonteCarloPlayer.Stats stats = ai.getStats();
-			ai.doTurn(turn);
 			logState();
-			logStats(stats);
-			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn);
+			logStats(ai.getStats());
+			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getBoard().dimensions);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
 			timer.stop();
 			if (gamegui != null) {
 				gamegui.updateGameState(msgDetails);
 			}
-			timer.start(ai.getState().getColorToMove());
+			timer.start(ai.getBoard().getColorToMove());
 		}
 	}
 
@@ -209,11 +209,11 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging to provide game history to the terminal */
 	private void logState() {
-		State state = ai.getState();
-		System.out.println(state);
+		Board board = ai.getBoard();
+		System.out.println(board);
 		if (aiColor == null) {
 			System.out.println("WE ARE SPECTATING");
-		} else if (state.getColorToMove() == aiColor) {
+		} else if (board.getColorToMove() == aiColor) {
 			System.out.println("OUR turn, we are " + aiColor);
 		} else {
 			System.out.println("OPPONENT'S turn, we are " + aiColor);
@@ -230,7 +230,7 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
 		}
-		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.simulations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
+		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.evaluations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
 	}
 	
 	@Override
