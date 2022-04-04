@@ -402,13 +402,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		if (workerThreads != null) {
-			running = false;
-			for (Thread thread : workerThreads) {
-				thread.join();
-			}
-			workerThreads.clear();
+		running = false;
+		for (Thread thread : workerThreads) {
+			thread.join();
 		}
+		workerThreads.clear();
 	}
 	
 }
