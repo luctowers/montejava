@@ -1,7 +1,6 @@
-package ubc.cosc322.engine.core;
+package ubc.cosc322.engine.analysis;
 
-import java.util.Arrays;
-
+import ubc.cosc322.engine.core.Dimensions;
 import ubc.cosc322.engine.util.IntList;
 
 /**

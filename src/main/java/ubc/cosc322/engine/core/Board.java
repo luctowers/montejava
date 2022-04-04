@@ -1,5 +1,6 @@
 package ubc.cosc322.engine.core;
 
+import ubc.cosc322.engine.analysis.ChamberAnalyzer;
 import ubc.cosc322.engine.util.ConsoleColors;
 import ubc.cosc322.engine.util.IntList;
 
