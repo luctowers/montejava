@@ -3,18 +3,23 @@ package ubc.cosc322;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
+import sfs2x.client.entities.Room;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
+import ubc.cosc322.engine.heuristics.RolloutHeuristic;
+import ubc.cosc322.engine.heuristics.SwitchHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.RandomMovePlayer;
+import ubc.cosc322.engine.players.RandomPlayer;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GameMessage;
@@ -34,14 +39,13 @@ public class COSC322Test extends GamePlayer {
 	
 	private String userName = null;
 	private String passwd = null;
-	private String room = null;
  
 	/** entry-point */
 	public static void main(String[] args) {
 		// parse arguments
 		String userName;
 		String passwd;
-		String room = null;
+		boolean nogui = false;
 		if (args.length == 0) {
 			Random random = new Random();
 			userName = "MonteJava#" + random.nextInt(1000);
@@ -51,14 +55,14 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			userName = args[0];
 			passwd = args[1];
-			if (args.length > 2) {
-				room = args[2];
+			if (args.length > 2 && args[2].equals("nogui")) {
+				nogui = true;
 			}
 		}
 
-		COSC322Test player = new COSC322Test(userName, passwd, room);
+		COSC322Test player = new COSC322Test(userName, passwd);
 		// if a room is specified assume no gui is needed, terminal only
-		if (room == null) {
+		if (!nogui) {
 			player.enableGUI();
 		}
 
@@ -77,21 +81,27 @@ public class COSC322Test extends GamePlayer {
 	}
 
 	/** create player that intereacts with the cosc322 game server */
-	public COSC322Test(String userName, String passwd, String room) {
+	public COSC322Test(String userName, String passwd) {
 		this.timer = new COSC322Timer();
 		this.userName = userName;
 		this.passwd = passwd;
-		this.room = room;
 		// create the monte carlo ai
 		// uniform random rollout player
+		// switch to hybrid rollout after 50 moves
 		// availableProcessors returns the number of cores in the system
-		// 28sec < 30sec deadline
+		// 25sec < 30sec deadline
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
-			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
+			() -> new SwitchHeuristic(
+				50,
+				new RolloutHeuristic(new RandomPlayer(new LegalMoveGenerator())),
+				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
+			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 28000, 0.3
+			Runtime.getRuntime().availableProcessors(), 25000, 0.3
 		);
+		// warmup the ai
+		ai.useBoard(new Board());
 	}
 
 	private void enableGUI() {
@@ -108,9 +118,17 @@ public class COSC322Test extends GamePlayer {
 		userName = gameClient.getUserName();
 		if (gamegui != null) {
 			gamegui.setRoomInformation(gameClient.getRoomList());
-		}
-		if (room != null) {
-			gameClient.joinRoom(room);
+		} else {
+			List<Room> rooms = gameClient.getRoomList();
+			for (int i = 0; i < rooms.size(); i++) {
+				Room room = rooms.get(i);
+				System.out.println("[" + i + "] " + room.getName() + " " + room.getUserCount() + "/2");
+			}
+			try (Scanner scanner = new Scanner(System.in)) {
+				System.out.print("Enter room number: ");
+				int roomIndex = scanner.nextInt();
+				gameClient.joinRoom(rooms.get(roomIndex).getName());
+			}
 		}
 	}
 

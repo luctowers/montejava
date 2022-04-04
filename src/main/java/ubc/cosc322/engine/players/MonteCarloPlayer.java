@@ -112,14 +112,14 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		}
 		RootStats newStats = new RootStats();
 		newStats.maxDepth = rootStats.maxDepth - 1;
-		newStats.evaluations.set((int) root.childrenEvaluations[index]);
-		double rewards;
+		newStats.evaluations.set(root.childrenEvaluations[index]);
+		int rewards;
 		if (root.color != child.color) {
 			rewards = root.childrenEvaluations[index] - root.childrenRewards[index];
 		} else {
 			rewards = root.childrenRewards[index];
 		}
-		newStats.rewards.set((int) rewards);
+		newStats.rewards.set(rewards);
 		rootStats = newStats;
 		root = child;
 		return true;
@@ -140,7 +140,7 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			double maxReward = 0.0;
 			int maxIndex = -1;
 			for (int i = 0; node != null && i < node.size(); i++) {
-				double reward = node.childrenRewards[i] / node.childrenEvaluations[i];
+				double reward = (double) node.childrenRewards[i] / node.childrenEvaluations[i];
 				if (reward >= maxReward) {
 					maxReward = reward;
 					maxIndex = i;
@@ -336,8 +336,8 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		public Color color;
 		public IntList moves;
 		public Node[] children;
-		public double[] childrenEvaluations;
-		public double[] childrenRewards;
+		public int[] childrenEvaluations;
+		public int[] childrenRewards;
 		public int nextToExpand;
 
 		// move generator is passed here, because we need to use the worker's
@@ -348,8 +348,8 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 			this.moves = new IntList(board.getMaxMoves());
 			moveGenerator.generateMoves(board, moves);
 			this.children = new Node[moves.size()];
-			this.childrenEvaluations = new double[moves.size()];
-			this.childrenRewards = new double[moves.size()];
+			this.childrenEvaluations = new int[moves.size()];
+			this.childrenRewards = new int[moves.size()];
 			this.nextToExpand = 0;
 		}
 
