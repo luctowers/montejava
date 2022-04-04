@@ -89,16 +89,16 @@ public class COSC322Test extends GamePlayer {
 		// uniform random rollout player
 		// switch to hybrid rollout after 50 moves
 		// availableProcessors returns the number of cores in the system
-		// 25sec < 30sec deadline
+		// 28sec < 30sec deadline
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
 			() -> new SwitchHeuristic(
-				50,
+				60,
 				new RolloutHeuristic(new RandomPlayer(new LegalMoveGenerator())),
 				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
 			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors()-1, 25000, 0.3
+			Runtime.getRuntime().availableProcessors()-1, 28000, 0.3
 		);
 		// warmup the ai
 		ai.useBoard(new Board());
