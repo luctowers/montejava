@@ -166,6 +166,11 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		return publicStats;
 	}
 
+	/** Sets the amount of time the player spends thinking. */
+	public void setThinkingTime(int thinkingMillis) {
+		this.thinkingMillis = thinkingMillis;
+	}
+
 	// each thread is a worker
 	private class Worker implements Runnable {
 

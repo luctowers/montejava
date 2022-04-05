@@ -209,6 +209,7 @@ public class COSC322Test extends GamePlayer {
 			}
 			logState();
 			logStats(ai.getStats());
+			updateThinkingMillis(ai.getStats());
 			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getBoard().dimensions);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
@@ -218,6 +219,22 @@ public class COSC322Test extends GamePlayer {
 			}
 			timer.start(ai.getBoard().getColorToMove());
 		}
+	}
+
+	private void updateThinkingMillis(MonteCarloPlayer.Stats stats) {
+		double confidence = 0.0;
+		if (aiColor == Color.WHITE) {
+			confidence = stats.whiteWinRatio;
+		} else if (aiColor == Color.BLACK) {
+			confidence = 1.0 - stats.whiteWinRatio;
+		}
+		int delta = (int) (23000 / 0.1 * (confidence - 0.9));
+		delta = Math.max(0, Math.min(delta, 23000));
+		int time = 28000 - delta;
+		if (delta != 0) {
+			System.out.println("OUR ai thinks it is WINNING reducing turn time to " + time + "ms");
+		}
+		ai.setThinkingTime(time);
 	}
 
 	private void logGameMessage(String messageType, Map<String, Object> msgDetails) {
@@ -248,13 +265,13 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging who the ai thinks is winning */
 	private void logStats(MonteCarloPlayer.Stats stats) {
-		double winPercentage = Math.round(1000.0 * stats.whiteWinRatio) / 10.0;
+		double winPercentage = 100.0 * stats.whiteWinRatio;
 		if (aiColor == Color.WHITE) {
-			System.out.println("OUR ai thinks WE have a " + winPercentage + "% chance of WINNING");
+			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
 		} else if (aiColor == Color.BLACK) {
-			System.out.println("OUR ai thinks WE have a " + (100.0-winPercentage) + "% chance of WINNING");
+			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", 100.0-winPercentage) + "% chance of WINNING");
 		} else {
-			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
+			System.out.println("OUR ai thinks WHITE has a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
 		}
 		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.evaluations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
 	}
