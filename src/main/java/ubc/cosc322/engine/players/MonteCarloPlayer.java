@@ -76,6 +76,9 @@ public class MonteCarloPlayer extends Player implements AutoCloseable {
 		workerThreads.clear();
 		for (int i = 0; i < threadCount; i++) {
 			Thread thread = new Thread(new Worker());
+			// set the thread priority to low so it doesn't ruin main thread
+			// responsivness, which can cause problems with turn timings
+			thread.setPriority(1);
 			thread.start();
 			workerThreads.add(thread);
 		}
