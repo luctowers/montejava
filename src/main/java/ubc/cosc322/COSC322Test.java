@@ -20,6 +20,7 @@ import ubc.cosc322.engine.heuristics.RolloutHeuristic;
 import ubc.cosc322.engine.heuristics.SwitchHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
 import ubc.cosc322.engine.players.RandomPlayer;
+import ubc.cosc322.engine.util.EmoticonReactions;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GameMessage;
@@ -33,6 +34,7 @@ public class COSC322Test extends GamePlayer {
 
 	private MonteCarloPlayer ai;
 	private Color aiColor;
+	private double lastWinRatio;
 
 	private GameClient gameClient = null; 
 	private BaseGameGUI gamegui = null;
@@ -152,6 +154,7 @@ public class COSC322Test extends GamePlayer {
 		Board board = COSC322Converter.decodeBoardState(msgDetails);
 		System.out.println(board);
 		ai.useBoard(board);
+		lastWinRatio = 0.5;
 		// reset aiColor in-case it was set in a previous game
 		aiColor = null;
 		timer.stop();
@@ -265,14 +268,19 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging who the ai thinks is winning */
 	private void logStats(MonteCarloPlayer.Stats stats) {
-		double winPercentage = 100.0 * stats.whiteWinRatio;
-		if (aiColor == Color.WHITE) {
-			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
-		} else if (aiColor == Color.BLACK) {
-			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", 100.0-winPercentage) + "% chance of WINNING");
-		} else {
-			System.out.println("OUR ai thinks WHITE has a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
+		double winRatio = stats.whiteWinRatio; 
+		if (aiColor == Color.BLACK) {
+			winRatio = 1.0 - winRatio;
 		}
+		double winPercentage = 100.0 * winRatio;
+		if (aiColor == null) {
+			System.out.println("OUR ai thinks WHITE has a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
+		} else {
+			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
+		}
+		double winRatioDelta = winRatio - lastWinRatio;
+		lastWinRatio = winRatio;
+		System.out.println("OUR ai's current mental state is " + EmoticonReactions.generateReaction(winRatio, winRatioDelta));
 		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.evaluations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
 	}
 	
