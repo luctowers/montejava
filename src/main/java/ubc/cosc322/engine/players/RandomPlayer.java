@@ -7,13 +7,13 @@ import ubc.cosc322.engine.generators.MoveGenerator;
 import ubc.cosc322.engine.util.IntList;
 
 /** A player that uses random generator to pick randomly between moves. */
-public class RandomMovePlayer extends Player {
+public class RandomPlayer extends Player {
 	
 	private MoveGenerator moveGenerator;
 	private Random randomGenerator;
 	private IntList moveBuffer;
 
-	public RandomMovePlayer(MoveGenerator moveGenerator) {
+	public RandomPlayer(MoveGenerator moveGenerator) {
 		this.moveGenerator = moveGenerator;
 		this.randomGenerator = new Random();
 	}

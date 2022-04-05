@@ -3,18 +3,24 @@ package ubc.cosc322;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
+import sfs2x.client.entities.Room;
 import ubc.cosc322.engine.core.Color;
 import ubc.cosc322.engine.core.Board;
 import ubc.cosc322.engine.core.Turn;
 import ubc.cosc322.engine.generators.ContestedMoveGenerator;
 import ubc.cosc322.engine.generators.LegalMoveGenerator;
 import ubc.cosc322.engine.heuristics.HybridRolloutHeuristic;
+import ubc.cosc322.engine.heuristics.RolloutHeuristic;
+import ubc.cosc322.engine.heuristics.SwitchHeuristic;
 import ubc.cosc322.engine.players.MonteCarloPlayer;
-import ubc.cosc322.engine.players.RandomMovePlayer;
+import ubc.cosc322.engine.players.RandomPlayer;
+import ubc.cosc322.engine.util.EmoticonReactions;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GameMessage;
@@ -28,20 +34,20 @@ public class COSC322Test extends GamePlayer {
 
 	private MonteCarloPlayer ai;
 	private Color aiColor;
+	private double lastWinRatio;
 
 	private GameClient gameClient = null; 
 	private BaseGameGUI gamegui = null;
 	
 	private String userName = null;
 	private String passwd = null;
-	private String room = null;
  
 	/** entry-point */
 	public static void main(String[] args) {
 		// parse arguments
 		String userName;
 		String passwd;
-		String room = null;
+		boolean nogui = false;
 		if (args.length == 0) {
 			Random random = new Random();
 			userName = "MonteJava#" + random.nextInt(1000);
@@ -51,14 +57,14 @@ public class COSC322Test extends GamePlayer {
 		} else {
 			userName = args[0];
 			passwd = args[1];
-			if (args.length > 2) {
-				room = args[2];
+			if (args.length > 2 && args[2].equals("nogui")) {
+				nogui = true;
 			}
 		}
 
-		COSC322Test player = new COSC322Test(userName, passwd, room);
+		COSC322Test player = new COSC322Test(userName, passwd);
 		// if a room is specified assume no gui is needed, terminal only
-		if (room == null) {
+		if (!nogui) {
 			player.enableGUI();
 		}
 
@@ -77,21 +83,27 @@ public class COSC322Test extends GamePlayer {
 	}
 
 	/** create player that intereacts with the cosc322 game server */
-	public COSC322Test(String userName, String passwd, String room) {
+	public COSC322Test(String userName, String passwd) {
 		this.timer = new COSC322Timer();
 		this.userName = userName;
 		this.passwd = passwd;
-		this.room = room;
 		// create the monte carlo ai
 		// uniform random rollout player
+		// switch to hybrid rollout after 60 moves
 		// availableProcessors returns the number of cores in the system
 		// 28sec < 30sec deadline
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
-			() -> new HybridRolloutHeuristic(new RandomMovePlayer(new ContestedMoveGenerator())),
+			() -> new SwitchHeuristic(
+				60,
+				new RolloutHeuristic(new RandomPlayer(new LegalMoveGenerator())),
+				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
+			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 28000, 0.3
+			Runtime.getRuntime().availableProcessors(), 28000, 1.0
 		);
+		// warmup the ai
+		ai.useBoard(new Board());
 	}
 
 	private void enableGUI() {
@@ -108,9 +120,17 @@ public class COSC322Test extends GamePlayer {
 		userName = gameClient.getUserName();
 		if (gamegui != null) {
 			gamegui.setRoomInformation(gameClient.getRoomList());
-		}
-		if (room != null) {
-			gameClient.joinRoom(room);
+		} else {
+			List<Room> rooms = gameClient.getRoomList();
+			for (int i = 0; i < rooms.size(); i++) {
+				Room room = rooms.get(i);
+				System.out.println("[" + i + "] " + room.getName() + " " + room.getUserCount() + "/2");
+			}
+			try (Scanner scanner = new Scanner(System.in)) {
+				System.out.print("Enter room number: ");
+				int roomIndex = scanner.nextInt();
+				gameClient.joinRoom(rooms.get(roomIndex).getName());
+			}
 		}
 	}
 
@@ -134,6 +154,7 @@ public class COSC322Test extends GamePlayer {
 		Board board = COSC322Converter.decodeBoardState(msgDetails);
 		System.out.println(board);
 		ai.useBoard(board);
+		lastWinRatio = 0.5;
 		// reset aiColor in-case it was set in a previous game
 		aiColor = null;
 		timer.stop();
@@ -153,7 +174,11 @@ public class COSC322Test extends GamePlayer {
 			aiColor = Color.BLACK;
 		}
 		timer.start(ai.getBoard().getColorToMove());
-		makeMove();
+		new Thread(new Runnable() {
+			public void run() {
+				makeMove();
+			}
+		}).start();
 	}
 
 	private void handleGameMove(Map<String, Object> msgDetails) {
@@ -167,7 +192,11 @@ public class COSC322Test extends GamePlayer {
 		timer.start(ai.getBoard().getColorToMove());
 		logState();
 		logStats(ai.getStats());
-		makeMove();
+		new Thread(new Runnable() {
+			public void run() {
+				makeMove();
+			}
+		}).start();
 	}
 
 	/** makes a move and sends it to the server, if it is our turn */
@@ -183,6 +212,7 @@ public class COSC322Test extends GamePlayer {
 			}
 			logState();
 			logStats(ai.getStats());
+			updateThinkingMillis(ai.getStats());
 			Map<String,Object> msgDetails = COSC322Converter.encodeTurn(turn, ai.getBoard().dimensions);
 			logGameMessage("meta.sent-action.move", msgDetails);
 			gameClient.sendMoveMessage(msgDetails);
@@ -192,6 +222,22 @@ public class COSC322Test extends GamePlayer {
 			}
 			timer.start(ai.getBoard().getColorToMove());
 		}
+	}
+
+	private void updateThinkingMillis(MonteCarloPlayer.Stats stats) {
+		double confidence = 0.0;
+		if (aiColor == Color.WHITE) {
+			confidence = stats.whiteWinRatio;
+		} else if (aiColor == Color.BLACK) {
+			confidence = 1.0 - stats.whiteWinRatio;
+		}
+		int delta = (int) (23000 / 0.1 * (confidence - 0.9));
+		delta = Math.max(0, Math.min(delta, 23000));
+		int time = 28000 - delta;
+		if (delta != 0) {
+			System.out.println("OUR ai thinks we are WINNING reducing turn time to " + time + "ms");
+		}
+		ai.setThinkingTime(time);
 	}
 
 	private void logGameMessage(String messageType, Map<String, Object> msgDetails) {
@@ -222,14 +268,19 @@ public class COSC322Test extends GamePlayer {
 
 	/** logging who the ai thinks is winning */
 	private void logStats(MonteCarloPlayer.Stats stats) {
-		double winPercentage = Math.round(1000.0 * stats.whiteWinRatio) / 10.0;
-		if (aiColor == Color.WHITE) {
-			System.out.println("OUR ai thinks WE have a " + winPercentage + "% chance of WINNING");
-		} else if (aiColor == Color.BLACK) {
-			System.out.println("OUR ai thinks WE have a " + (100.0-winPercentage) + "% chance of WINNING");
-		} else {
-			System.out.println("OUR ai thinks WHITE has a " + winPercentage + "% chance of WINNING");
+		double winRatio = stats.whiteWinRatio; 
+		if (aiColor == Color.BLACK) {
+			winRatio = 1.0 - winRatio;
 		}
+		double winPercentage = 100.0 * winRatio;
+		if (aiColor == null) {
+			System.out.println("OUR ai thinks WHITE has a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
+		} else {
+			System.out.println("OUR ai thinks WE have a " + String.format("%,.2f", winPercentage) + "% chance of WINNING");
+		}
+		double winRatioDelta = winRatio - lastWinRatio;
+		lastWinRatio = winRatio;
+		System.out.println("OUR ai's current mental state is " + EmoticonReactions.generateReaction(winRatio, winRatioDelta));
 		System.out.println(NumberFormat.getNumberInstance(Locale.CANADA).format(stats.evaluations) + " SIMULATIONS performed with MAX DEPTH of " + stats.maxDepth);
 	}
 	

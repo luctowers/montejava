@@ -8,7 +8,7 @@ public class SwitchHeuristic implements Heuristic {
 	private Heuristic h1, h2;
 	private int switchAferMove;
 
-	public SwitchHeuristic(Heuristic h1, Heuristic h2, int switchAferMove) {
+	public SwitchHeuristic(int switchAferMove, Heuristic h1, Heuristic h2) {
 		this.h1 = h1;
 		this.h2 = h2;
 		this.switchAferMove = switchAferMove;
