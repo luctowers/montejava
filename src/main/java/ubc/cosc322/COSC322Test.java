@@ -171,7 +171,11 @@ public class COSC322Test extends GamePlayer {
 			aiColor = Color.BLACK;
 		}
 		timer.start(ai.getBoard().getColorToMove());
-		makeMove();
+		new Thread(new Runnable() {
+			public void run() {
+				makeMove();
+			}
+		}).start();
 	}
 
 	private void handleGameMove(Map<String, Object> msgDetails) {
@@ -185,7 +189,11 @@ public class COSC322Test extends GamePlayer {
 		timer.start(ai.getBoard().getColorToMove());
 		logState();
 		logStats(ai.getStats());
-		makeMove();
+		new Thread(new Runnable() {
+			public void run() {
+				makeMove();
+			}
+		}).start();
 	}
 
 	/** makes a move and sends it to the server, if it is our turn */
