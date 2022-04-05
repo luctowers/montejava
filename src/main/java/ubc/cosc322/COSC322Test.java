@@ -98,7 +98,7 @@ public class COSC322Test extends GamePlayer {
 				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
 			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors()-1, 28000, 1.0
+			Runtime.getRuntime().availableProcessors(), 28000, 1.0
 		);
 		// warmup the ai
 		ai.useBoard(new Board());
@@ -232,7 +232,7 @@ public class COSC322Test extends GamePlayer {
 		delta = Math.max(0, Math.min(delta, 23000));
 		int time = 28000 - delta;
 		if (delta != 0) {
-			System.out.println("OUR ai thinks it is WINNING reducing turn time to " + time + "ms");
+			System.out.println("OUR ai thinks we are WINNING reducing turn time to " + time + "ms");
 		}
 		ai.setThinkingTime(time);
 	}
