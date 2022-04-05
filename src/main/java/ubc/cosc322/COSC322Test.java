@@ -98,7 +98,7 @@ public class COSC322Test extends GamePlayer {
 				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
 			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors()-1, 28000, 0.3
+			Runtime.getRuntime().availableProcessors()-1, 28000, 1.0
 		);
 		// warmup the ai
 		ai.useBoard(new Board());
