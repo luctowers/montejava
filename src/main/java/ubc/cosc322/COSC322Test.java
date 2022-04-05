@@ -87,7 +87,7 @@ public class COSC322Test extends GamePlayer {
 		this.passwd = passwd;
 		// create the monte carlo ai
 		// uniform random rollout player
-		// switch to hybrid rollout after 50 moves
+		// switch to hybrid rollout after 60 moves
 		// availableProcessors returns the number of cores in the system
 		// 28sec < 30sec deadline
 		// 0.3 exploration factor
