@@ -95,12 +95,20 @@ public class COSC322Test extends GamePlayer {
 		// 0.3 exploration factor
 		this.ai = new MonteCarloPlayer(
 			() -> new SwitchHeuristic(
-				60,
-				new RolloutHeuristic(new RandomPlayer(new LegalMoveGenerator())),
-				new HybridRolloutHeuristic(new RandomPlayer(new ContestedMoveGenerator()))
+				60, // switch between heuristics at move 60 (turn 30)
+				// full rollouts first
+				new RolloutHeuristic(
+					new RandomPlayer(new LegalMoveGenerator())
+				),
+				// hybrid rollouts second for improved endgame
+				new HybridRolloutHeuristic(
+					new RandomPlayer(new ContestedMoveGenerator())
+				)
 			),
 			() -> new LegalMoveGenerator(),
-			Runtime.getRuntime().availableProcessors(), 28000, 1.0
+			Runtime.getRuntime().availableProcessors(),
+			28000, // 28 second thinking time
+			1.0 // UCT exploration factor
 		);
 		// warmup the ai
 		ai.useBoard(new Board());
