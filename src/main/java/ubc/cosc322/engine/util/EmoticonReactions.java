@@ -60,7 +60,7 @@ public class EmoticonReactions {
 	};
 
 	public static String generateReaction(double condfidence, double confidenceDelta) {
-		if (confidenceDelta <= -5.0) {
+		if (confidenceDelta <= -0.05) {
 			return randomReaction(tableFlip);
 		}
 		if (condfidence <= 0.30) {
