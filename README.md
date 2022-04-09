@@ -20,7 +20,7 @@ java -jar team-01.jar username password
 
 ```
 # run with no gui
-java -jar team-01.jar username password "Room Name"
+java -jar team-01.jar username password nogui
 ```
 
  To test locally checkout the LocalTest class!
