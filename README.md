@@ -23,8 +23,30 @@ java -jar team-01.jar username password
 java -jar team-01.jar username password nogui
 ```
 
- To test locally checkout the LocalTest class!
+To test locally checkout the LocalTest class!
 
 ## Project Structure
 
 All of the functional bits for our AI are in [java.ubc.cosc322.engine](src/main/java/ubc/cosc322/engine). The rest is mostly just code wrapping the prof's API.
+
+## Final Tournament Configuration
+
+```java
+new MonteCarloPlayer(
+	() -> new SwitchHeuristic(
+		60, // switch between heuristics at move 60 (turn 30)
+		// full rollouts first
+		new RolloutHeuristic(
+			new RandomPlayer(new LegalMoveGenerator())
+		),
+		// hybrid rollouts second for improved endgame
+		new HybridRolloutHeuristic(
+			new RandomPlayer(new ContestedMoveGenerator())
+		)
+	),
+	() -> new LegalMoveGenerator(),
+	Runtime.getRuntime().availableProcessors(), // 1 thread per core
+	28000, // 28 second thinking time
+	0.6 // UCT exploration factor
+);
+```
