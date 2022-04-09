@@ -108,7 +108,7 @@ public class COSC322Test extends GamePlayer {
 			() -> new LegalMoveGenerator(),
 			Runtime.getRuntime().availableProcessors(),
 			28000, // 28 second thinking time
-			1.0 // UCT exploration factor
+			0.6 // UCT exploration factor
 		);
 		// warmup the ai
 		ai.useBoard(new Board());
