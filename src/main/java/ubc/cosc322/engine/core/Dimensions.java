@@ -31,16 +31,16 @@ public final class Dimensions {
 	/** Creates a dimensions object with given axis. */
 	public Dimensions(int boardWidth, int boardHeight) {
 		if (boardWidth < 4) {
-			throw new IllegalArgumentException("board width must be greater than four");
+			throw new IllegalArgumentException("board width must be at least 4");
 		}
 		if (boardHeight < 4) {
-			throw new IllegalArgumentException("board height must be greater than four");
+			throw new IllegalArgumentException("board height must be at least 4");
 		}
 		if (boardWidth > 32) {
-			throw new IllegalArgumentException("board width must me less than four");
+			throw new IllegalArgumentException("board width must be no more than 32");
 		}
 		if (boardHeight > 32) {
-			throw new IllegalArgumentException("board height must me less than four");
+			throw new IllegalArgumentException("board height must be no more than 32");
 		}
 		this.boardSize = boardWidth * boardHeight;
 		this.boardWidth = boardWidth;
